@@ -9,9 +9,12 @@ export interface DiseaseListItem {
   prevalence: string | null
   brief_description: string | null
   organ_systems: string[]
+  editorial_status: string | null
 }
 
 export interface DiseaseDetail extends DiseaseListItem {
+  published_at: string | null
+  reviewed_at: string | null
   omim_code: string | null
   primary_etiology: string | null
   course_modifier: string | null
@@ -69,6 +72,7 @@ export async function listDiseases(opts: {
       d.codes_icd10_code   AS icd10_code,
       d.epidemiology_prevalence AS prevalence,
       LEFT(dl.brief_description, 180) AS brief_description,
+      d.status AS editorial_status,
       COALESCE(
         (SELECT array_agg(dos.value::text ORDER BY dos."order")
          FROM diseases_organ_systems dos WHERE dos.parent_id = d.id),
@@ -108,6 +112,9 @@ export async function getDiseaseBySlug(
        d.epidemiology_prevalence AS prevalence,
        d.primary_etiology,
        d.modifiers_course_modifier AS course_modifier,
+       d.status AS editorial_status,
+       d.published_at,
+       d.reviewed_at,
        dl.brief_description,
        dl.disclaimer
      FROM diseases d

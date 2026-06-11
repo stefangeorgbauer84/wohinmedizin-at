@@ -13,13 +13,28 @@
  * Terminologie-Layer: ORPHA, ICD-11 (Stem + Extension Codes), SNOMED CT, DSM-5-TR, OMIM, HPO
  */
 
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, CollectionBeforeChangeHook } from 'payload'
+
+const autoTimestampHook: CollectionBeforeChangeHook = ({ data, originalDoc }) => {
+  const prev = originalDoc?.status
+  const next = data?.status
+  if (next === 'published' && prev !== 'published' && !data.publishedAt) {
+    data.publishedAt = new Date().toISOString()
+  }
+  if ((next === 'medical_review' || next === 'editorial_review') && prev === 'draft') {
+    data.submittedForReviewAt = new Date().toISOString()
+  }
+  return data
+}
 
 export const Diseases: CollectionConfig = {
   slug: 'diseases',
+  hooks: {
+    beforeChange: [autoTimestampHook],
+  },
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'primaryEtiology', 'status', 'reviewedAt'],
+    defaultColumns: ['name', 'status', 'reviewedAt', 'publishedAt'],
     group: 'Seltene Erkrankungen',
     description:
       'Krankheitsprofile nach 7-Ebenen-Multi-Axial-Typologie (ICD-11 / SNOMED CT / DSM-5-TR). Ein Profil kann mehrere Organsysteme gleichzeitig betreffen (polyhierarchisch).',
@@ -905,7 +920,195 @@ export const Diseases: CollectionConfig = {
     },
 
     // ─────────────────────────────────────────────────────────
-    // ABSCHNITT 6: ANLAUFSTELLEN
+    // ABSCHNITT 6: REDAKTIONELLE AUFBEREITUNG
+    // Tags · Arzt-Empfehlung · Kuratierte Links
+    // ─────────────────────────────────────────────────────────
+
+    // --- Redaktionelle Tags ---
+    {
+      name: 'editorialTags',
+      type: 'array',
+      label: 'Redaktionelle Tags (Patienten-Sprache)',
+      admin: {
+        description:
+          'Frei vergebene Schlagwörter in einfacher Sprache — z.B. "Muskeln", "Kinder", "Erblich", "Schmerzen", "unsichtbare Krankheit", "Diagnose dauert oft Jahre". 3–8 Tags pro Eintrag. Ergänzen die technischen Systemtags aus Organsystem und Ätiologie.',
+      },
+      fields: [
+        {
+          name: 'tag',
+          type: 'text',
+          label: 'Tag',
+          required: true,
+        },
+      ],
+    },
+
+    // --- Arzt-Empfehlung ---
+    {
+      name: 'doctorGuidance',
+      type: 'group',
+      label: 'Arzt-Empfehlung — Zu wem gehe ich?',
+      admin: {
+        description:
+          'Der praktisch wichtigste Abschnitt für Betroffene. Erklärt Schritt für Schritt, wen man wann aufsuchen soll — von der ersten Beschwerde bis zum spezialisierten Zentrum.',
+      },
+      fields: [
+        {
+          name: 'urgencyNote',
+          type: 'select',
+          label: 'Dringlichkeit',
+          admin: {
+            description:
+              'Wie dringend sollte die erste Abklärung sein? Orientiert sich an klinischer Leitlinien-Logik (Routineüberweisung vs. dringende Zuweisung vs. Notaufnahme).',
+          },
+          options: [
+            {
+              label: 'Routine — innerhalb von Wochen zum Hausarzt/zur Hausärztin',
+              value: 'routine',
+            },
+            {
+              label: 'Bald — innerhalb einiger Tage zum Arzt/zur Ärztin',
+              value: 'soon',
+            },
+            {
+              label: 'Dringend — noch am selben oder nächsten Tag abklären lassen',
+              value: 'urgent',
+            },
+            {
+              label: 'Notfall — sofort in die Notaufnahme oder Rettung rufen (144)',
+              value: 'emergency',
+            },
+          ],
+        },
+        {
+          name: 'firstContact',
+          type: 'richText',
+          label: 'Erster Schritt — wer zuerst?',
+          localized: true,
+          admin: {
+            description:
+              'Wer ist der richtige erste Ansprechpartner? Hausarzt/-ärztin? Kinderarzt/-ärztin? Direkt zur Fachärztin? In einfacher Sprache erklären, warum genau dieser erste Schritt sinnvoll ist.',
+          },
+        },
+        {
+          name: 'specialties',
+          type: 'relationship',
+          label: 'Zuständige Fachrichtungen',
+          relationTo: 'specialties',
+          hasMany: true,
+          admin: {
+            description:
+              'Alle Fachrichtungen, die für diese Erkrankung relevant sind. Primäre Fachrichtung zuerst auflisten.',
+          },
+        },
+        {
+          name: 'specialtiesNote',
+          type: 'richText',
+          label: 'Warum diese Fachärzt:innen?',
+          localized: true,
+          admin: {
+            description:
+              'Kurze Erklärung für Betroffene, warum genau diese Fachrichtungen zuständig sind und was dort passiert. Kein Fachjargon.',
+          },
+        },
+        {
+          name: 'diagnosticJourney',
+          type: 'richText',
+          label: 'Typischer Diagnoseweg',
+          localized: true,
+          admin: {
+            description:
+              'Wie sieht der Weg von den ersten Beschwerden bis zur Diagnose typischerweise aus? Welche Stationen, Wartezeiten, Tests sind zu erwarten? Gibt es eine typische Diagnoseverzögerung?',
+          },
+        },
+        {
+          name: 'redFlagSymptoms',
+          type: 'richText',
+          label: 'Warnsignale — wann sofort zum Arzt?',
+          localized: true,
+          admin: {
+            description:
+              'Konkrete Warnsignale, bei denen Betroffene nicht warten sollten. Klar, knapp, verständlich — keine Panikmache, aber deutliche Orientierung.',
+          },
+        },
+      ],
+    },
+
+    // --- Kuratierte Links ---
+    {
+      name: 'curatedLinks',
+      type: 'array',
+      label: 'Kuratierte Links (5 Pflicht)',
+      admin: {
+        description:
+          'Mindestens 5 geprüfte Links pro Erkrankung. Kategorien: Selbsthilfe/Patientenorganisation, Offizielle klinische Quelle, Verständliche Erklärung, Forschung/Studie, Notfall/Erste Orientierung. Links regelmäßig auf Aktualität prüfen.',
+      },
+      fields: [
+        {
+          name: 'category',
+          type: 'select',
+          label: 'Kategorie',
+          required: true,
+          options: [
+            {
+              label: 'Selbsthilfe & Patientenorganisation',
+              value: 'self_help',
+            },
+            {
+              label: 'Offizielle klinische Quelle (Orphanet, Fachgesellschaft, UniKlinik)',
+              value: 'clinical',
+            },
+            {
+              label: 'Verständliche Erklärung (gesundheit.gv.at, Netdoktor, MSD Manual)',
+              value: 'layperson',
+            },
+            {
+              label: 'Aktuelle Forschung (PubMed, ClinicalTrials, EURORDIS)',
+              value: 'research',
+            },
+            {
+              label: 'Notfall & Erste Orientierung (1450, Krisentelefon, Notaufnahme)',
+              value: 'emergency',
+            },
+          ],
+        },
+        {
+          name: 'title',
+          type: 'text',
+          label: 'Titel des Links',
+          required: true,
+        },
+        {
+          name: 'url',
+          type: 'text',
+          label: 'URL',
+          required: true,
+        },
+        {
+          name: 'language',
+          type: 'select',
+          label: 'Sprache',
+          defaultValue: 'de',
+          options: [
+            { label: 'Deutsch', value: 'de' },
+            { label: 'Englisch', value: 'en' },
+          ],
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          label: 'Kurzbeschreibung (was findet man dort?)',
+        },
+        {
+          name: 'lastChecked',
+          type: 'date',
+          label: 'Link zuletzt geprüft',
+        },
+      ],
+    },
+
+    // ─────────────────────────────────────────────────────────
+    // ABSCHNITT 8: ANLAUFSTELLEN
     // ─────────────────────────────────────────────────────────
     {
       name: 'organizations',
@@ -933,7 +1136,7 @@ export const Diseases: CollectionConfig = {
     },
 
     // ─────────────────────────────────────────────────────────
-    // ABSCHNITT 7: QUELLEN, REVIEW & QUALITÄTSSICHERUNG
+    // ABSCHNITT 9: QUELLEN, REVIEW & QUALITÄTSSICHERUNG
     // ─────────────────────────────────────────────────────────
     {
       name: 'sources',
@@ -977,7 +1180,7 @@ export const Diseases: CollectionConfig = {
     },
 
     // ─────────────────────────────────────────────────────────
-    // ABSCHNITT 8: META
+    // ABSCHNITT 10: META
     // ─────────────────────────────────────────────────────────
     {
       name: 'featuredImage',
@@ -998,6 +1201,47 @@ export const Diseases: CollectionConfig = {
         { label: 'Archiviert / Veraltet', value: 'archived' },
       ],
       defaultValue: 'draft',
+      admin: {
+        position: 'sidebar',
+        description: 'Workflow: Entwurf → Medizinische Prüfung → Redaktionelle Prüfung → Veröffentlicht',
+      },
+    },
+    {
+      name: 'publishedAt',
+      type: 'date',
+      label: 'Veröffentlicht am',
+      admin: {
+        position: 'sidebar',
+        description: 'Wird automatisch gesetzt wenn Status → Veröffentlicht.',
+        readOnly: false,
+      },
+    },
+    {
+      name: 'reviewedAt',
+      type: 'date',
+      label: 'Zuletzt geprüft am',
+      admin: {
+        position: 'sidebar',
+        description: 'Datum der letzten inhaltlichen Prüfung durch einen Mediziner oder Redakteur.',
+      },
+    },
+    {
+      name: 'submittedForReviewAt',
+      type: 'date',
+      label: 'Zur Prüfung eingereicht am',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Wird automatisch gesetzt wenn Status auf Prüfung wechselt.',
+      },
+    },
+    {
+      name: 'editorialNotes',
+      type: 'textarea',
+      label: 'Redaktionelle Notizen (intern)',
+      admin: {
+        description: 'Interne Hinweise für das Redaktionsteam — nicht öffentlich sichtbar.',
+      },
     },
   ],
 }

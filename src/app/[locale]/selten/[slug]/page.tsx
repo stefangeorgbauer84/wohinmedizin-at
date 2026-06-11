@@ -119,6 +119,21 @@ export default async function DiseaseDetailPage({ params }: Props) {
           </div>
         </div>
 
+        {/* Geprüft-Banner */}
+        {disease.editorial_status === 'published' && (
+          <div className="bg-emerald-50 border-b border-emerald-100">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600 shrink-0" aria-hidden="true">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <p className="text-xs text-emerald-700">
+                Dieser Eintrag wurde redaktionell geprüft
+                {disease.reviewed_at ? ` (${new Date(disease.reviewed_at).toLocaleDateString('de-AT')})` : ''}.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <section className="bg-white pb-8 pt-8 border-b border-[var(--color-border)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -14,7 +14,10 @@
     "orpha:dry-run": "tsx scripts/orphadata/import.ts --dry-run --limit 10",
     "orpha:import:pilot": "tsx scripts/orphadata/import.ts --limit 50",
     "orpha:import:neuro": "tsx scripts/orphadata/import.ts --cluster neuro --limit 100",
-    "orpha:import": "tsx scripts/orphadata/import.ts"
+    "orpha:import": "tsx scripts/orphadata/import.ts",
+    "payload:migrate:create": "next -- payload migrate:create",
+    "payload:migrate": "next -- payload migrate",
+    "payload:generate:types": "next -- payload generate:types"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

@@ -62,11 +62,18 @@ async function DiseaseGrid({ q, organ, page }: { q?: string; organ?: string; pag
               <h2 className="text-sm font-semibold text-[var(--color-medizin-navy)] group-hover:text-[var(--color-selten-violett)] transition-colors leading-snug line-clamp-2">
                 {d.name}
               </h2>
-              {d.orpha_code && (
-                <span className="shrink-0 text-xs font-mono bg-[var(--color-morgen-hellblau)] text-[var(--color-donau-blau)] px-2 py-0.5 rounded-full">
-                  {d.orpha_code.replace('ORPHA:', '')}
-                </span>
-              )}
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                {d.orpha_code && (
+                  <span className="text-xs font-mono bg-[var(--color-morgen-hellblau)] text-[var(--color-donau-blau)] px-2 py-0.5 rounded-full">
+                    {d.orpha_code.replace('ORPHA:', '')}
+                  </span>
+                )}
+                {d.editorial_status === 'published' && (
+                  <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
+                    Geprüft
+                  </span>
+                )}
+              </div>
             </div>
 
             {d.brief_description && (
