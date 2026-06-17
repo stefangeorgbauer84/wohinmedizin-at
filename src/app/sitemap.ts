@@ -18,16 +18,23 @@ const WISSEN_SLUGS = [
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const pool = getPool()
-
-  // Alle veröffentlichten Krankheitsseiten (slug + letzte Aktualisierung)
-  const { rows } = await pool.query<{ slug: string; updated_at: string | null }>(`
-    SELECT slug, updated_at
-    FROM   diseases
-    WHERE  slug IS NOT NULL
-    ORDER  BY id
-    LIMIT  60000
-  `)
+  // Krankheits-URLs aus der DB — build-resilient: ist die DB zur Build-Zeit nicht
+  // erreichbar (z.B. fehlende DATABASE_URI in der Preview), liefern wir nur die
+  // statischen Seiten und revalidieren die volle Sitemap zur Laufzeit.
+  let rows: Array<{ slug: string; updated_at: string | null }> = []
+  try {
+    const pool = getPool()
+    const res = await pool.query<{ slug: string; updated_at: string | null }>(`
+      SELECT slug, updated_at
+      FROM   diseases
+      WHERE  slug IS NOT NULL
+      ORDER  BY id
+      LIMIT  60000
+    `)
+    rows = res.rows
+  } catch {
+    rows = []
+  }
 
   const diseasEntries: MetadataRoute.Sitemap = rows.map((r) => ({
     url: `${SITE_URL}/selten/${r.slug}`,
