@@ -20,17 +20,24 @@ interface NavigatorResult {
   hinweis: string
 }
 
-export default function NavigatorPage() {
+// Warnzeichen, die sofortige Hilfe erfordern — clientseitige Vorabprüfung
+const RED_FLAG_PATTERNS = /\b(atemnot|luftnot|ersticke|brustschmerz|herzinfarkt|schlaganfall|lähmung|gelähmt|bewusstlos|ohnmacht|krampfanfall|starke blutung|blute stark|vergiftung|suizid|selbstmord|sehverlust|plötzlich blind|nicht mehr sprechen)\b/i
+
+export default function NavigatorPageClient() {
   const t = useTranslations('navigator')
   const [anliegen, setAnliegen] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<NavigatorResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [emergency, setEmergency] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!anliegen.trim() || loading) return
+
+    // Notfall-Warnzeichen erkennen — Hinweis zeigen, Orientierung trotzdem erlauben
+    setEmergency(RED_FLAG_PATTERNS.test(anliegen))
 
     setLoading(true)
     setResult(null)
@@ -60,7 +67,12 @@ export default function NavigatorPage() {
         accumulated += decoder.decode(value, { stream: true })
       }
 
-      const parsed: NavigatorResult = JSON.parse(accumulated)
+      let parsed: NavigatorResult
+      try {
+        parsed = JSON.parse(accumulated)
+      } catch {
+        throw new Error('Die Antwort konnte nicht ausgewertet werden. Bitte formuliere dein Anliegen etwas anders und versuche es erneut.')
+      }
       setResult(parsed)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unbekannter Fehler.')
@@ -70,7 +82,7 @@ export default function NavigatorPage() {
   }
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: '#F3FAFF' }}>
+    <main id="hauptinhalt" className="min-h-screen" style={{ backgroundColor: '#F3FAFF' }}>
       {/* Header */}
       <header style={{ backgroundColor: '#123047' }} className="px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
@@ -106,6 +118,41 @@ export default function NavigatorPage() {
           </p>
         </div>
 
+        {/* Datenschutz-Hinweis — DSGVO Art. 13, Anthropic-Datenübertragung */}
+        <div
+          className="rounded-xl px-5 py-3 mb-6 text-xs flex gap-2 items-start"
+          style={{ backgroundColor: '#EFF8FF', border: '1px solid #B3D8F8', color: '#4A6080' }}
+        >
+          <svg className="flex-shrink-0 mt-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E88E5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>
+            Deine Eingabe wird zur Verarbeitung an Anthropic (USA) übertragen. Gib keine identifizierenden Informationen (Name, Adresse, Geburtsdatum) ein.
+            Weitere Informationen findest du in unserer{' '}
+            <a href="/datenschutz" className="underline hover:opacity-80">Datenschutzerklärung</a>.
+          </span>
+        </div>
+
+        {/* Notfall-Warnung bei erkannten Warnzeichen */}
+        {emergency && (
+          <div
+            role="alert"
+            className="rounded-xl px-5 py-4 mb-6 flex gap-3 items-start"
+            style={{ backgroundColor: '#FFF0F0', border: '2px solid #FF6B6B', color: '#C62828' }}
+          >
+            <svg className="flex-shrink-0 mt-0.5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <div>
+              <p className="font-bold mb-1">Mögliches Notfallsymptom erkannt</p>
+              <p className="text-sm">
+                Wenn die Beschwerden akut oder bedrohlich sind, warte nicht auf eine Orientierung.
+                Wähle sofort den Notruf <strong>144</strong> (Rettung) oder <strong>112</strong> — oder geh in die nächste Notaufnahme.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Input form */}
         <form onSubmit={handleSubmit} className="mb-10">
           <div
@@ -118,7 +165,8 @@ export default function NavigatorPage() {
               onChange={(e) => setAnliegen(e.target.value)}
               placeholder={t('placeholder')}
               rows={4}
-              className="w-full px-6 pt-5 pb-3 text-base resize-none focus:outline-none"
+              maxLength={1000}
+              className="w-full px-6 pt-5 pb-3 text-base resize-none rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1E88E5]"
               style={{ backgroundColor: 'transparent', color: '#123047' }}
               disabled={loading}
             />
@@ -304,6 +352,27 @@ export default function NavigatorPage() {
                 </ol>
               </div>
             )}
+
+            {/* Weiter auf WohinMedizin — konkrete nächste Schritte */}
+            <div className="rounded-2xl px-6 py-5" style={{ backgroundColor: '#FFFDF8', border: '1px solid #D6EAF8' }}>
+              <span className="text-xs font-semibold uppercase tracking-wider block mb-3" style={{ color: '#1E88E5' }}>
+                Weiter auf WohinMedizin
+              </span>
+              <div className="flex flex-col gap-2">
+                <a href="/finden" className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors" style={{ backgroundColor: '#F3FAFF', color: '#123047' }}>
+                  <span>Anzeichen auswählen und mögliche Erkrankungen finden</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+                <a href={`/selten?q=${encodeURIComponent(anliegen.trim().slice(0, 60))}`} className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors" style={{ backgroundColor: '#F3FAFF', color: '#123047' }}>
+                  <span>Krankheitsdatenbank zu deinem Anliegen durchsuchen</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+                <a href="/spezialistinnen" className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors" style={{ backgroundColor: '#F3FAFF', color: '#123047' }}>
+                  <span>Spezialist:innen & Zentren in Österreich ansehen</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
 
             {/* Pflichthinweis */}
             <p className="text-xs text-center px-4" style={{ color: '#8AABB8' }}>

@@ -261,7 +261,14 @@ async function main() {
   console.log('✅ Eingeloggt\n')
 
   let ok = 0, err = 0
-  for (const { slug, ...data } of ORGS) {
+  for (const { slug, ...rest } of ORGS) {
+    // ORPHA-Codes ins Array-Feld-Format bringen: ['586'] → [{ code: '586' }]
+    const c = rest as Record<string, unknown>
+    const orphaCodes = c.orphaCodes as string[] | undefined
+    const data = {
+      ...c,
+      ...(orphaCodes?.length ? { orphaCodes: orphaCodes.map((code) => ({ code })) } : {}),
+    }
     try {
       await upsert(token, slug, data)
       ok++

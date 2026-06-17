@@ -9,12 +9,26 @@ type Props = {
   params: Promise<{ locale: string }>
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://wohinmedizin.at'
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'metadata' })
+
+  // hreflang: de ohne Prefix (localePrefix: 'as-needed'), alle anderen mit Prefix
+  const hreflangAlternates: Record<string, string> = {}
+  for (const loc of routing.locales) {
+    hreflangAlternates[loc] = loc === 'de' ? SITE_URL : `${SITE_URL}/${loc}`
+  }
+  hreflangAlternates['x-default'] = SITE_URL
+
   return {
     title: t('title'),
     description: t('description'),
+    alternates: {
+      languages: hreflangAlternates,
+    },
+    metadataBase: new URL(SITE_URL),
   }
 }
 

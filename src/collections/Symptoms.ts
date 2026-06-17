@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
+import { publicReadAdminWrite } from '@/access'
 
 export const Symptoms: CollectionConfig = {
   slug: 'symptoms',
+  access: publicReadAdminWrite,
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'hpoCode', 'category', 'updatedAt'],

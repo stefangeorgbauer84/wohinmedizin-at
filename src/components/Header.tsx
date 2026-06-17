@@ -1,12 +1,19 @@
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { LanguageSwitcher } from './LanguageSwitcher'
+import { NavLink } from './NavLink'
 
 export async function Header() {
   const t = await getTranslations('nav')
 
   return (
     <header className="bg-white border-b border-[var(--color-border)] sticky top-0 z-50">
+      <a
+        href="#hauptinhalt"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[60] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--color-medizin-navy)] focus:text-white focus:text-sm"
+      >
+        Zum Hauptinhalt springen
+      </a>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
 
@@ -26,30 +33,40 @@ export async function Header() {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-5 text-sm flex-1">
-            <Link href="/beschwerden"
-              className="text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] transition-colors whitespace-nowrap">
-              {t('symptoms')}
-            </Link>
-            <Link href="/erkrankungen"
-              className="text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] transition-colors whitespace-nowrap">
+            <NavLink href="/selten"
+              className="text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] transition-colors whitespace-nowrap"
+              activeClassName="!text-[var(--color-medizin-navy)] font-medium">
               {t('diseases')}
-            </Link>
-            <Link href="/fachrichtungen"
-              className="text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] transition-colors whitespace-nowrap">
+            </NavLink>
+            <NavLink href="/spezialistinnen"
+              className="text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] transition-colors whitespace-nowrap"
+              activeClassName="!text-[var(--color-medizin-navy)] font-medium">
               {t('specialties')}
-            </Link>
-            <Link href="/selten"
-              className="text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] transition-colors whitespace-nowrap">
-              {t('rare')}
-            </Link>
-            <Link href="/fuer-aerzte"
-              className="text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] transition-colors whitespace-nowrap">
+            </NavLink>
+            <NavLink href="/wissen"
+              className="text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] transition-colors whitespace-nowrap"
+              activeClassName="!text-[var(--color-medizin-navy)] font-medium">
+              Wissen
+            </NavLink>
+            <NavLink href="/finden"
+              className="text-[var(--color-selten-violett)] font-medium hover:opacity-80 transition-opacity whitespace-nowrap"
+              activeClassName="underline underline-offset-4">
+              Symptom-Finder
+            </NavLink>
+            <NavLink href="/fuer-aerzte"
+              className="text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] transition-colors whitespace-nowrap"
+              activeClassName="!text-[var(--color-medizin-navy)] font-medium">
               {t('forDoctors')}
-            </Link>
+            </NavLink>
           </nav>
 
-          {/* Right side: Language switcher + CTA */}
+          {/* Right side: Merkliste + Language switcher + CTA */}
           <div className="flex items-center gap-3 shrink-0">
+            <Link href="/merkliste" aria-label="Meine Merkliste" className="hidden sm:inline-flex p-2 rounded-lg text-[var(--color-muted)] hover:text-[var(--color-selten-violett)] transition-colors">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+              </svg>
+            </Link>
             {/* Language Switcher — always visible */}
             <LanguageSwitcher />
 

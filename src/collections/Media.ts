@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
+import { publicReadAdminWrite } from '@/access'
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  access: publicReadAdminWrite,
   admin: {
     useAsTitle: 'alt',
   },

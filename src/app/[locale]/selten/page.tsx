@@ -5,10 +5,27 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { listDiseases } from '@/lib/diseases'
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://wohinmedizin.at'
+
 export const metadata: Metadata = {
   title: 'Seltene Erkrankungen — WohinMedizin.at',
   description:
     'Informationen zu über 11.000 seltenen Erkrankungen: Symptome, Codes, Vererbung, Prävalenz und österreichische Anlaufstellen.',
+  alternates: { canonical: `${SITE_URL}/selten` },
+  openGraph: {
+    title: 'Seltene Erkrankungen — WohinMedizin.at',
+    description:
+      'Über 11.000 seltene Erkrankungen mit ORPHA-Code, HPO-Symptomen, ICD-11-Codes und österreichischen Spezialzentren.',
+    url: `${SITE_URL}/selten`,
+    siteName: 'WohinMedizin.at',
+    locale: 'de_AT',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Seltene Erkrankungen — WohinMedizin.at',
+    description: 'Über 11.000 seltene Erkrankungen mit österreichischen Anlaufstellen.',
+  },
 }
 
 const ORGAN_LABELS: Record<string, string> = {
@@ -27,6 +44,23 @@ const ORGAN_LABELS: Record<string, string> = {
   psychiatric:                'Psychiatrisch',
   multisystemic:              'Multisystemisch',
   oncological:                'Onkologisch',
+}
+
+// Label → URL-Slug der Bereichs-Hub-Seiten (interne Verlinkung)
+const ORGAN_HUB_SLUG: Record<string, string> = {
+  'Neurologisch': 'neurologisch',
+  'Herz & Gefäße': 'herz-gefaesse',
+  'Bewegungsapparat': 'bewegungsapparat',
+  'Blut & Immunsystem': 'blut-immunsystem',
+  'Stoffwechsel': 'stoffwechsel',
+  'Haut': 'haut',
+  'Magen-Darm': 'magen-darm',
+  'Niere & Harnwege': 'niere-harnwege',
+  'Augen': 'augen',
+  'Ohren': 'ohren',
+  'Psychiatrisch': 'psychiatrisch',
+  'Multisystemisch': 'multisystemisch',
+  'Onkologisch': 'onkologisch',
 }
 
 type SearchParams = Promise<{ q?: string; organ?: string; page?: string }>
@@ -130,12 +164,13 @@ async function DiseaseGrid({ q, organ, page }: { q?: string; organ?: string; pag
 
 export default async function SeltenPage({ searchParams }: { searchParams: SearchParams }) {
   const { q, organ, page: pageStr } = await searchParams
-  const page = Math.max(1, parseInt(pageStr ?? '1', 10))
+  const parsedPage = parseInt(pageStr ?? '1', 10)
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1
 
   return (
     <>
       <Header />
-      <main className="flex-1">
+      <main id="hauptinhalt" className="flex-1">
 
         {/* Hero */}
         <section className="selten-gradient py-14 md:py-20">
@@ -159,6 +194,26 @@ export default async function SeltenPage({ searchParams }: { searchParams: Searc
         {/* Suche + Filter + Ergebnisse */}
         <section className="py-10 bg-[var(--color-warmweiss)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {/* Symptom-Finder CTA — der Einstieg für Betroffene ohne Krankheitsnamen */}
+            <Link
+              href="/finden"
+              className="flex items-center gap-4 mb-8 p-5 rounded-xl bg-violet-50 border border-violet-200 hover:border-[var(--color-selten-violett)] transition-colors group"
+            >
+              <span className="shrink-0 w-11 h-11 rounded-xl wohin-gradient text-white flex items-center justify-center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+                </svg>
+              </span>
+              <span>
+                <span className="block text-sm font-semibold text-[var(--color-medizin-navy)] group-hover:text-[var(--color-selten-violett)] transition-colors">
+                  Du kennst den Namen nicht? Starte beim Symptom-Finder
+                </span>
+                <span className="block text-sm text-[var(--color-muted)]">
+                  Wähle deine Anzeichen und sieh, welche Erkrankungen dazu passen könnten.
+                </span>
+              </span>
+            </Link>
 
             {/* Suchleiste */}
             <form method="GET" action="" className="mb-6">
@@ -209,6 +264,21 @@ export default async function SeltenPage({ searchParams }: { searchParams: Searc
                 </Link>
               ))}
             </div>
+
+            {/* Bereiche durchstöbern — interne Verlinkung zu den Hub-Seiten (nur auf der Standardansicht) */}
+            {!q && !organ && (
+              <div className="mb-8 rounded-xl bg-white border border-[var(--color-border)] p-5">
+                <p className="text-sm font-semibold text-[var(--color-medizin-navy)] mb-3">Nach Bereich durchstöbern</p>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(ORGAN_HUB_SLUG).map(([label, slug]) => (
+                    <Link key={slug} href={`/selten/bereich/${slug}`}
+                      className="text-sm bg-[var(--color-warmweiss)] border border-[var(--color-border)] text-[var(--color-medizin-navy)] px-3 py-1.5 rounded-full hover:border-[var(--color-selten-violett)] hover:text-[var(--color-selten-violett)] transition-colors">
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Ergebnisse */}
             <Suspense fallback={<div className="py-20 text-center text-[var(--color-muted)]">Lade Erkrankungen…</div>}>

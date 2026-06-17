@@ -61,7 +61,11 @@ export default buildConfig({
     tablesFilter: ['!hc_entities', '!hc_compliance_flags', '!hc_entity_sources', '!hc_scraping_runs'],
   }),
 
-  secret: process.env.PAYLOAD_SECRET || '',
+  secret: (() => {
+    const s = process.env.PAYLOAD_SECRET
+    if (!s || s.length < 32) throw new Error('PAYLOAD_SECRET fehlt oder ist zu kurz (min. 32 Zeichen). Bitte in .env.local setzen.')
+    return s
+  })(),
 
   typescript: {
     outputFile: path.resolve(dirname, 'src/payload-types.ts'),

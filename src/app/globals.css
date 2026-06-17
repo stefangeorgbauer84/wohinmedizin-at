@@ -46,3 +46,22 @@ body {
 .selten-gradient {
   background: linear-gradient(135deg, #1E88E5, #7C3AED, #3DDC97);
 }
+
+/* Druckansicht: Navigation, Footer und interaktive Schaltflächen ausblenden */
+@media print {
+  header,
+  footer,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+  body {
+    background: #fff !important;
+  }
+  a[href]::after {
+    content: '';
+  }
+}

@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
+import { publicReadAdminWrite } from '@/access'
 
 export const ExpertCenters: CollectionConfig = {
   slug: 'expert-centers',
+  access: publicReadAdminWrite,
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'centerType', 'country', 'verified', 'updatedAt'],
@@ -84,6 +86,41 @@ export const ExpertCenters: CollectionConfig = {
       type: 'textarea',
       label: 'Beschreibung',
       localized: true,
+    },
+    {
+      name: 'organSystems',
+      type: 'select',
+      label: 'Behandelte Organsysteme',
+      hasMany: true,
+      admin: {
+        description: 'Verbindet das Zentrum mit passenden Erkrankungen (Versorgungspfad).',
+      },
+      options: [
+        { label: 'Neurologisch', value: 'neurological' },
+        { label: 'Herz & Gefäße', value: 'cardiovascular' },
+        { label: 'Bewegungsapparat', value: 'musculoskeletal' },
+        { label: 'Blut & Immunsystem', value: 'hematological_immunological' },
+        { label: 'Stoffwechsel', value: 'endocrine_metabolic' },
+        { label: 'Haut', value: 'dermatological' },
+        { label: 'Magen-Darm', value: 'gastrointestinal' },
+        { label: 'Atemwege', value: 'respiratory' },
+        { label: 'Niere & Harnwege', value: 'urogenital' },
+        { label: 'Augen', value: 'visual' },
+        { label: 'Ohren', value: 'auditory' },
+        { label: 'Reproduktion', value: 'reproductive' },
+        { label: 'Psychiatrisch', value: 'psychiatric' },
+        { label: 'Multisystemisch', value: 'multisystemic' },
+        { label: 'Onkologisch', value: 'oncological' },
+      ],
+    },
+    {
+      name: 'orphaCodes',
+      type: 'array',
+      label: 'Behandelte ORPHA-Codes',
+      admin: {
+        description: 'Direkter Bezug zu einzelnen Erkrankungen (ohne ORPHA:-Präfix).',
+      },
+      fields: [{ name: 'code', type: 'text', label: 'ORPHA-Code' }],
     },
     {
       name: 'verified',

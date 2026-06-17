@@ -343,7 +343,21 @@ async function main() {
   console.log('✅ Eingeloggt\n')
 
   let ok = 0, err = 0
-  for (const { slug, ...data } of CENTERS) {
+  for (const { slug, ...rest } of CENTERS) {
+    // Schema-Abgleich: die reichen Seed-Felder auf die echten Collection-Felder mappen.
+    const c = rest as Record<string, unknown>
+    const ernMembership = c.ernMembership as string[] | undefined
+    const isERNMember = c.isERNMember as boolean | undefined
+    const institution = c.institution as string | undefined
+    const data = {
+      ...c,
+      centerType: isERNMember
+        ? 'ern'
+        : institution && /Universit|Klinik/.test(institution)
+          ? 'university'
+          : 'national_ref',
+      ...(ernMembership?.length ? { ernNetwork: ernMembership.join(', ') } : {}),
+    }
     try {
       await upsert(token, slug, data)
       ok++
