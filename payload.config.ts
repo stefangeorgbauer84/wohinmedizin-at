@@ -63,8 +63,14 @@ export default buildConfig({
 
   secret: (() => {
     const s = process.env.PAYLOAD_SECRET
-    if (!s || s.length < 32) throw new Error('PAYLOAD_SECRET fehlt oder ist zu kurz (min. 32 Zeichen). Bitte in .env.local setzen.')
-    return s
+    if (s && s.length >= 32) return s
+    // In echter Produktion hart abbrechen — niemals mit leerem/schwachem Secret signieren.
+    if (process.env.VERCEL_ENV === 'production') {
+      throw new Error('PAYLOAD_SECRET fehlt oder ist zu kurz (min. 32 Zeichen). In den Produktions-Umgebungsvariablen setzen.')
+    }
+    // Preview/lokal: laut warnen, aber Build/Preview nicht blockieren.
+    console.warn('⚠️  PAYLOAD_SECRET fehlt oder < 32 Zeichen — unsicherer Fallback nur für Preview/Entwicklung.')
+    return 'insecure-preview-fallback-secret-please-set-payload-secret-32+'
   })(),
 
   typescript: {
