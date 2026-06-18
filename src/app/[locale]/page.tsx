@@ -5,6 +5,7 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { getPlatformStats, getFeaturedDiseases } from '@/lib/diseases'
 import { UniversalSearch } from '@/components/UniversalSearch'
+import { RecentlyViewed } from '@/components/RecentlyViewed'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://wohinmedizin.at'
 
@@ -175,6 +176,9 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ── Weiter, wo du warst (zuletzt angesehen) ── */}
+        <RecentlyViewed />
 
         {/* ── Trust Anchors ── */}
         <section className="bg-white border-b border-[var(--color-border)] py-12">

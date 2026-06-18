@@ -33,10 +33,29 @@ const PAGES: Array<{ label: string; href: string; keywords: string }> = [
   { label: 'Wie funktioniert eine Überweisung?', href: '/wissen/ueberweisung-oesterreich', keywords: 'überweisung zuweisung facharzt' },
 ]
 
+// Alltagssprache → Fachbegriff, damit Laien auch ohne korrekten Namen finden
+const SYNONYMS: Record<string, string> = {
+  glasknochen: 'Osteogenesis imperfecta',
+  'schmetterlingskrankheit': 'Epidermolysis bullosa',
+  mukoviszidose: 'Zystische Fibrose',
+  bluterkrankheit: 'Hämophilie',
+  bluter: 'Hämophilie',
+  'weichteilrheuma': 'Fibromyalgie',
+  zuckerkrankheit: 'Diabetes',
+  knochenschwund: 'Osteoporose',
+  nervenwasser: 'Multiple Sklerose',
+  'wasserkopf': 'Hydrozephalus',
+  elefantenmensch: 'Neurofibromatose',
+  'vampirkrankheit': 'Porphyrie',
+  'steinmann': 'Fibrodysplasia ossificans progressiva',
+}
+
 export async function universalSearch(qRaw: string, locale = 'de'): Promise<UniversalResults> {
   const q = qRaw.trim()
   if (q.length < 2) return { diseases: [], symptoms: [], pages: [] }
   const lower = q.toLowerCase()
+  // Synonym-Treffer: Schlüssel als Teilstring der Eingabe?
+  const synonymTerm = Object.entries(SYNONYMS).find(([key]) => lower.includes(key))?.[1] ?? null
 
   // 1) Erkrankungen — tippfehlertolerant (ILIKE + trigram)
   let diseases: SearchResult[] = []
@@ -46,10 +65,14 @@ export async function universalSearch(qRaw: string, locale = 'de'): Promise<Univ
       `SELECT d.slug, dl.name, d.codes_orpha_code AS orpha_code
        FROM diseases d
        JOIN diseases_locales dl ON dl._parent_id = d.id AND dl._locale = $2
-       WHERE dl.name ILIKE $3 OR word_similarity($1, dl.name) > 0.5
+       WHERE dl.name ILIKE $3
+          OR word_similarity($1, dl.name) > 0.5
+          OR ($4::text IS NOT NULL AND dl.name ILIKE $4)
+          OR d.codes_orpha_code ILIKE $5
+          OR d.codes_icd10_code ILIKE $5
        ORDER BY (dl.name ILIKE $3) DESC, word_similarity($1, dl.name) DESC, length(dl.name)
        LIMIT 6`,
-      [q, locale, `%${q}%`],
+      [q, locale, `%${q}%`, synonymTerm ? `%${synonymTerm}%` : null, `%${q.replace(/^orpha:?/i, '').trim()}%`],
     )
     diseases = rows.map((r) => ({
       type: 'disease' as const,

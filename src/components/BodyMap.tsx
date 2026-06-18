@@ -13,27 +13,29 @@ interface Region {
   id: string
   label: string
   hub: string
-  // Position des Labels/Hotspots in % des Containers
+  value: string // Organsystem-Wert (für Anzahl-Lookup)
+  hint: string  // Beispiel-Orientierung bei Hover
   top: string
   left: string
 }
 
 const REGIONS: Region[] = [
-  { id: 'kopf', label: 'Kopf & Nerven', hub: 'neurologisch', top: '4%', left: '50%' },
-  { id: 'augen', label: 'Augen', hub: 'augen', top: '15%', left: '22%' },
-  { id: 'ohren', label: 'Ohren', hub: 'ohren', top: '15%', left: '78%' },
-  { id: 'brust', label: 'Herz & Gefäße', hub: 'herz-gefaesse', top: '33%', left: '50%' },
-  { id: 'lunge', label: 'Atemwege', hub: 'atemwege', top: '30%', left: '20%' },
-  { id: 'bauch', label: 'Magen & Darm', hub: 'magen-darm', top: '48%', left: '50%' },
-  { id: 'niere', label: 'Niere & Harnwege', hub: 'niere-harnwege', top: '47%', left: '80%' },
-  { id: 'gelenke', label: 'Muskeln & Gelenke', hub: 'bewegungsapparat', top: '62%', left: '18%' },
-  { id: 'haut', label: 'Haut', hub: 'haut', top: '70%', left: '82%' },
-  { id: 'ganz', label: 'Ganzer Körper', hub: 'multisystemisch', top: '88%', left: '50%' },
+  { id: 'kopf', label: 'Kopf & Nerven', hub: 'neurologisch', value: 'neurological', hint: 'z.B. Bewegungsstörungen, neuromuskuläre Erkrankungen', top: '4%', left: '50%' },
+  { id: 'augen', label: 'Augen', hub: 'augen', value: 'visual', hint: 'z.B. erbliche Netzhauterkrankungen', top: '15%', left: '22%' },
+  { id: 'ohren', label: 'Ohren', hub: 'ohren', value: 'auditory', hint: 'z.B. erbliche Hörstörungen', top: '15%', left: '78%' },
+  { id: 'brust', label: 'Herz & Gefäße', hub: 'herz-gefaesse', value: 'cardiovascular', hint: 'z.B. Marfan-Syndrom, Kardiomyopathien', top: '33%', left: '50%' },
+  { id: 'lunge', label: 'Atemwege', hub: 'atemwege', value: 'respiratory', hint: 'z.B. Mukoviszidose, seltene Lungenfibrosen', top: '30%', left: '20%' },
+  { id: 'bauch', label: 'Magen & Darm', hub: 'magen-darm', value: 'gastrointestinal', hint: 'z.B. seltene Leber- & Darmerkrankungen', top: '48%', left: '50%' },
+  { id: 'niere', label: 'Niere & Harnwege', hub: 'niere-harnwege', value: 'urogenital', hint: 'z.B. seltene Nierenerkrankungen', top: '47%', left: '80%' },
+  { id: 'gelenke', label: 'Muskeln & Gelenke', hub: 'bewegungsapparat', value: 'musculoskeletal', hint: 'z.B. Bindegewebs- & Knochenerkrankungen', top: '62%', left: '18%' },
+  { id: 'haut', label: 'Haut', hub: 'haut', value: 'dermatological', hint: 'z.B. Epidermolysis bullosa, Ichthyosen', top: '70%', left: '82%' },
+  { id: 'ganz', label: 'Ganzer Körper', hub: 'multisystemisch', value: 'multisystemic', hint: 'Erkrankungen, die mehrere Organe betreffen', top: '88%', left: '50%' },
 ]
 
-export function BodyMap() {
+export function BodyMap({ counts = {} }: { counts?: Record<string, number> }) {
   const router = useRouter()
   const [hover, setHover] = useState<string | null>(null)
+  const hovered = REGIONS.find((r) => r.id === hover)
 
   function go(hub: string) {
     router.push(`/selten/bereich/${hub}`)
@@ -77,12 +79,32 @@ export function BodyMap() {
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-selten-violett)]" aria-hidden="true" />
             {r.label}
+            {counts[r.value] ? (
+              <span className="ml-0.5 text-[10px] text-[var(--color-muted)]">{counts[r.value].toLocaleString('de-AT')}</span>
+            ) : null}
           </button>
         ))}
       </div>
-      <p className="text-xs text-[var(--color-muted)] mt-4 text-center max-w-xs">
-        Tippe auf die Körperregion, die dich betrifft — du siehst dann passende Erkrankungen und Anlaufstellen.
-      </p>
+
+      {/* Beispiel-Hinweis zur gerade fokussierten Region */}
+      <div className="mt-4 min-h-[2.5rem] text-center max-w-sm">
+        {hovered ? (
+          <p className="text-sm text-[var(--color-medizin-navy)]">
+            <strong>{hovered.label}:</strong> <span className="text-[var(--color-muted)]">{hovered.hint}</span>
+          </p>
+        ) : (
+          <p className="text-xs text-[var(--color-muted)]">
+            Tippe auf die Körperregion, die dich betrifft — du siehst dann passende Erkrankungen und Anlaufstellen.
+          </p>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={() => router.push('/navigator')}
+        className="mt-2 text-sm font-medium text-[var(--color-donau-blau)] hover:underline"
+      >
+        Nicht sicher, wo? Beschreib es im Navigator →
+      </button>
     </div>
   )
 }

@@ -10,6 +10,7 @@ import { FinderMatch } from '@/components/FinderMatch'
 import { PrintButton } from '@/components/PrintButton'
 import { BookmarkButton } from '@/components/BookmarkButton'
 import { BackToTop } from '@/components/BackToTop'
+import { TrackRecent } from '@/components/TrackRecent'
 import { VerifiedBadge } from '@/components/VerifiedBadge'
 import { jsonLdString } from '@/lib/seo'
 import { getTrialsForDisease, trialsSearchUrl } from '@/lib/clinical-trials'
@@ -314,6 +315,7 @@ export default async function DiseaseDetailPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: jsonLdString(faqLd) }}
         />
       )}
+      <TrackRecent label={disease.name} href={`/selten/${slug}`} />
       <Header />
       <main id="hauptinhalt" className="flex-1">
 

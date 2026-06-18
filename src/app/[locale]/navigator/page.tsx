@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 interface FachRichtung {
@@ -25,7 +26,9 @@ const RED_FLAG_PATTERNS = /\b(atemnot|luftnot|ersticke|brustschmerz|herzinfarkt|
 
 export default function NavigatorPageClient() {
   const t = useTranslations('navigator')
-  const [anliegen, setAnliegen] = useState('')
+  const searchParams = useSearchParams()
+  // Übergabe aus WohinSuche/Startseite: ?q= füllt das Feld vor
+  const [anliegen, setAnliegen] = useState(() => (searchParams.get('q') ?? '').slice(0, 1000))
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<NavigatorResult | null>(null)
   const [error, setError] = useState<string | null>(null)

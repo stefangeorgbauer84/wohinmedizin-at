@@ -233,6 +233,22 @@ export async function getDiseaseBySlug(
  * Verwandte Erkrankungen über gemeinsame Organsysteme — für internes Linking
  * (mehr Seiten pro Sitzung, tiefere Crawl-Pfade, bessere Themen-Cluster).
  */
+/** Anzahl Erkrankungen je Organsystem (für die Körperkarte). */
+export async function getOrganCounts(): Promise<Record<string, number>> {
+  const pool = getPool()
+  try {
+    const { rows } = await pool.query<{ value: string; c: string }>(
+      `SELECT value::text AS value, count(DISTINCT parent_id) AS c
+       FROM diseases_organ_systems GROUP BY value`,
+    )
+    const out: Record<string, number> = {}
+    for (const r of rows) out[r.value] = parseInt(r.c, 10)
+    return out
+  } catch {
+    return {}
+  }
+}
+
 /** Plattform-Kennzahlen für Trust-Sektionen (gecacht). */
 export async function getPlatformStats(): Promise<{ diseases: number; hpo: number; icd11: number }> {
   const pool = getPool()
