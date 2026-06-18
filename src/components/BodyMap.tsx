@@ -42,11 +42,25 @@ const HEAT_DOT: Record<0 | 1 | 2 | 3, string> = {
   3: 'bg-[var(--color-selten-violett)]',
 }
 
-export function BodyMap({ counts = {} }: { counts?: Record<string, number> }) {
+export function BodyMap({
+  counts = {},
+  topDisease = {},
+  cooccurrence = {},
+}: {
+  counts?: Record<string, number>
+  topDisease?: Record<string, { slug: string; name: string }>
+  cooccurrence?: Record<string, string>
+}) {
   const router = useRouter()
   const [hover, setHover] = useState<string | null>(null)
   const [selected, setSelected] = useState<string[]>([])
   const hovered = REGIONS.find((r) => r.id === hover)
+  // Region, deren Detail-Kontext (Beispiel/Co-Region) gezeigt wird: Auswahl hat Vorrang vor Hover
+  const focusId = selected[selected.length - 1] ?? hover
+  const focused = REGIONS.find((r) => r.id === focusId)
+  const example = focused ? topDisease[focused.value] : undefined
+  const coValue = focused ? cooccurrence[focused.value] : undefined
+  const coRegion = coValue ? REGIONS.find((r) => r.value === coValue) : undefined
 
   const maxCount = Math.max(1, ...Object.values(counts))
 
@@ -186,19 +200,40 @@ export function BodyMap({ counts = {} }: { counts?: Record<string, number> }) {
         })}
       </div>
 
-      {/* Hover-Hint */}
+      {/* Hover-/Auswahl-Hint mit konkretem Beispiel */}
       <div className="mt-4 min-h-[2.5rem] text-center max-w-sm">
-        {hovered ? (
-          <p className="text-sm text-[var(--color-medizin-navy)]">
-            <strong>{hovered.label}:</strong>{' '}
-            <span className="text-[var(--color-muted)]">{hovered.hint}</span>
-          </p>
+        {focused ? (
+          <div className="space-y-1.5">
+            <p className="text-sm text-[var(--color-medizin-navy)]">
+              <strong>{focused.label}:</strong>{' '}
+              <span className="text-[var(--color-muted)]">{focused.hint}</span>
+            </p>
+            {example && (
+              <p className="text-sm">
+                <span className="text-[var(--color-muted)]">z.B. </span>
+                <button type="button" onClick={() => router.push(`/selten/${example.slug}`)}
+                  className="font-medium text-[var(--color-selten-violett)] hover:underline">
+                  {example.name}
+                </button>
+              </p>
+            )}
+          </div>
         ) : (
           <p className="text-xs text-[var(--color-muted)]">
             Tippe auf die Körperregion, die dich betrifft — du siehst dann passende Erkrankungen und Anlaufstellen.
           </p>
         )}
       </div>
+
+      {/* „Oft gemeinsam betroffen" — datengetriebener Multisystem-Vorschlag */}
+      {coRegion && focused && !selected.includes(coRegion.id) && (
+        <button type="button"
+          onClick={() => setSelected([focused.id, coRegion.id])}
+          className="mt-2 inline-flex items-center gap-1.5 text-xs text-[var(--color-donau-blau)] hover:underline">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 12h8M12 8v8" /><circle cx="12" cy="12" r="9" /></svg>
+          Oft gemeinsam betroffen: {coRegion.label} hinzufügen
+        </button>
+      )}
       <button
         type="button"
         onClick={() => router.push('/navigator')}

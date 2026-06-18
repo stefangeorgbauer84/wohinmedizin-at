@@ -3,7 +3,7 @@ import { Link } from '@/i18n/navigation'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { BodyMap } from '@/components/BodyMap'
-import { getOrganCounts } from '@/lib/diseases'
+import { getOrganCounts, getTopDiseasePerOrgan, getOrganCooccurrence } from '@/lib/diseases'
 
 export const revalidate = 86400
 
@@ -34,7 +34,11 @@ const BEREICHE: Array<{ label: string; slug: string }> = [
 ]
 
 export default async function BeschwerdenPage() {
-  const organCounts = await getOrganCounts()
+  const [organCounts, topDisease, cooccurrence] = await Promise.all([
+    getOrganCounts(),
+    getTopDiseasePerOrgan(),
+    getOrganCooccurrence(),
+  ])
   return (
     <>
       <Header />
@@ -62,7 +66,7 @@ export default async function BeschwerdenPage() {
 
           <h2 className="text-lg font-semibold text-[var(--color-medizin-navy)] mb-4">Nach Körperregion</h2>
           <div className="rounded-2xl bg-white border border-[var(--color-border)] p-6 mb-6">
-            <BodyMap counts={organCounts} />
+            <BodyMap counts={organCounts} topDisease={topDisease} cooccurrence={cooccurrence} />
           </div>
 
           <p className="text-sm text-[var(--color-muted)] mb-3">Oder direkt wählen:</p>

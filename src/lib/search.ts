@@ -19,6 +19,7 @@ export interface UniversalResults {
   symptoms: SearchResult[]
   pages: SearchResult[]
   bodyPart?: { label: string; hub: string; id: string } | null
+  didYouMean?: { label: string; href: string } | null
 }
 
 // Körperregion-Erkennung: Tipp-Begriff → passende BodyMap-Region
@@ -67,7 +68,7 @@ const SYNONYMS: Record<string, string> = {
 
 export async function universalSearch(qRaw: string, locale = 'de'): Promise<UniversalResults> {
   const q = qRaw.trim()
-  if (q.length < 2) return { diseases: [], symptoms: [], pages: [], bodyPart: null }
+  if (q.length < 2) return { diseases: [], symptoms: [], pages: [], bodyPart: null, didYouMean: null }
   const lower = q.toLowerCase()
   // Körperregion-Erkennung
   const bodyPart = BODY_PART_MAP.find((b) => b.keywords.some((kw) => lower.includes(kw))) ?? null
@@ -132,5 +133,15 @@ export async function universalSearch(qRaw: string, locale = 'de'): Promise<Univ
     .slice(0, 4)
     .map((p) => ({ type: 'page' as const, label: p.label, href: p.href }))
 
-  return { diseases, symptoms, pages, bodyPart: bodyPart ? { label: bodyPart.label, hub: bodyPart.hub, id: bodyPart.id } : null }
+  // „Meintest du?" — bei Tippfehler/Synonym: Eingabe taucht in keinem Treffernamen auf
+  let didYouMean: { label: string; href: string } | null = null
+  if (q.length >= 3 && diseases.length > 0) {
+    const isCodeQuery = /^[a-z]*:?\s*[\d.]+$/i.test(q)
+    const directHit = diseases.some((d) => d.label.toLowerCase().includes(lower))
+    if (!isCodeQuery && !directHit) {
+      didYouMean = { label: diseases[0].label, href: diseases[0].href }
+    }
+  }
+
+  return { diseases, symptoms, pages, bodyPart: bodyPart ? { label: bodyPart.label, hub: bodyPart.hub, id: bodyPart.id } : null, didYouMean }
 }

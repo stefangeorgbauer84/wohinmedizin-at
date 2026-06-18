@@ -262,6 +262,60 @@ export async function getOrganCounts(): Promise<Record<string, number>> {
   }
 }
 
+/**
+ * Ein bekanntes Beispiel je Organsystem (für die Körperkarte): bevorzugt
+ * redaktionell geprüfte, sonst kürzeste Namen (meist die „Wurzel"-Erkrankung).
+ * Macht die Regionen konkret greifbar statt nur generischer Hinweise.
+ */
+export async function getTopDiseasePerOrgan(
+  locale = 'de',
+): Promise<Record<string, { slug: string; name: string }>> {
+  const pool = getPool()
+  try {
+    const { rows } = await pool.query<{ organ: string; slug: string; name: string }>(
+      `SELECT DISTINCT ON (dos.value)
+              dos.value::text AS organ, d.slug, dl.name
+       FROM diseases_organ_systems dos
+       JOIN diseases d ON d.id = dos.parent_id
+       JOIN diseases_locales dl ON dl._parent_id = d.id AND dl._locale = $1
+       WHERE d.slug IS NOT NULL
+       ORDER BY dos.value, (d.status = 'published') DESC, length(dl.name), dl.name`,
+      [locale],
+    )
+    const out: Record<string, { slug: string; name: string }> = {}
+    for (const r of rows) out[r.organ] = { slug: r.slug, name: r.name }
+    return out
+  } catch {
+    return {}
+  }
+}
+
+/**
+ * Am häufigsten gemeinsam betroffenes Organsystem je Organsystem.
+ * Grundlage für „Oft gemeinsam betroffen" — nutzt den Multisystem-Charakter
+ * seltener Erkrankungen als einzigartigen Navigations-Mehrwert.
+ */
+export async function getOrganCooccurrence(): Promise<Record<string, string>> {
+  const pool = getPool()
+  try {
+    const { rows } = await pool.query<{ organ: string; co_organ: string }>(
+      `SELECT organ, co_organ FROM (
+         SELECT a.value::text AS organ, b.value::text AS co_organ,
+                row_number() OVER (PARTITION BY a.value ORDER BY count(*) DESC) AS rn
+         FROM diseases_organ_systems a
+         JOIN diseases_organ_systems b
+           ON a.parent_id = b.parent_id AND a.value <> b.value
+         GROUP BY a.value, b.value
+       ) t WHERE rn = 1`,
+    )
+    const out: Record<string, string> = {}
+    for (const r of rows) out[r.organ] = r.co_organ
+    return out
+  } catch {
+    return {}
+  }
+}
+
 /** Plattform-Kennzahlen für Trust-Sektionen (gecacht). */
 export async function getPlatformStats(): Promise<{ diseases: number; hpo: number; icd11: number }> {
   const pool = getPool()

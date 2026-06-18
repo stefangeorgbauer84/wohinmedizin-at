@@ -4,9 +4,14 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from '@/i18n/navigation'
 
 interface Result { type: 'disease' | 'symptom' | 'page'; label: string; sublabel?: string; href: string }
-interface Results { diseases: Result[]; symptoms: Result[]; pages: Result[]; bodyPart?: { label: string; hub: string; id: string } | null }
+interface Results {
+  diseases: Result[]; symptoms: Result[]; pages: Result[]
+  bodyPart?: { label: string; hub: string; id: string } | null
+  didYouMean?: { label: string; href: string } | null
+}
 
-const EMPTY: Results = { diseases: [], symptoms: [], pages: [], bodyPart: null }
+const EMPTY: Results = { diseases: [], symptoms: [], pages: [], bodyPart: null, didYouMean: null }
+const SEARCH_HISTORY_KEY = 'wohin:searches'
 
 // Kuratierte häufig gesuchte Begriffe — erscheinen im leeren Suchfeld
 const TRENDING = [
@@ -41,6 +46,22 @@ function readRecent(): Result[] {
   } catch { return [] }
 }
 
+function readSearchHistory(): string[] {
+  try {
+    const raw = localStorage.getItem(SEARCH_HISTORY_KEY)
+    return raw ? (JSON.parse(raw) as string[]).slice(0, 5) : []
+  } catch { return [] }
+}
+
+function pushSearchHistory(term: string) {
+  const t = term.trim()
+  if (t.length < 3) return
+  try {
+    const prev = readSearchHistory().filter((x) => x.toLowerCase() !== t.toLowerCase())
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify([t, ...prev].slice(0, 8)))
+  } catch { /* ignore */ }
+}
+
 export function UniversalSearch({
   size = 'lg',
   placeholder = 'Symptom, Krankheit oder Frage eingeben …',
@@ -53,6 +74,7 @@ export function UniversalSearch({
   const [loading, setLoading] = useState(false)
   const [active, setActive] = useState(0)
   const [recent, setRecent] = useState<Result[]>([])
+  const [history, setHistory] = useState<string[]>([])
   const [voiceSupported, setVoiceSupported] = useState(false)
   const [listening, setListening] = useState(false)
   const [showSlashHint, setShowSlashHint] = useState(false)
@@ -98,10 +120,13 @@ export function UniversalSearch({
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => runSearch(value), 180)
   }
-  function go(href: string) { setOpen(false); router.push(href) }
+  function go(href: string) {
+    if (!isEmpty) pushSearchHistory(q)
+    setOpen(false); router.push(href)
+  }
 
   function onFocus() {
-    setRecent(readRecent()); setOpen(true)
+    setRecent(readRecent()); setHistory(readSearchHistory()); setOpen(true)
     if (showSlashHint) {
       setShowSlashHint(false)
       try { localStorage.setItem('wohin:slash-hint-seen', '1') } catch { /* ignore */ }
@@ -240,6 +265,26 @@ export function UniversalSearch({
                   {recent.map((item) => renderRow(item, item.label))}
                 </div>
               )}
+              {/* Letzte Suchen (Suchverlauf) */}
+              {history.length > 0 && (
+                <div className="px-4 pt-3 pb-1 border-t border-[var(--color-border)]">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted)]">Letzte Suchen</p>
+                    <button type="button"
+                      onClick={() => { try { localStorage.removeItem(SEARCH_HISTORY_KEY) } catch { /* */ } setHistory([]) }}
+                      className="text-[11px] text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)]">Löschen</button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {history.map((term) => (
+                      <button key={term} type="button" onClick={() => onChange(term)}
+                        className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-[var(--color-border)] text-[var(--color-medizin-navy)] bg-white hover:border-[var(--color-donau-blau)] hover:text-[var(--color-donau-blau)] transition-colors">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               {/* Trending-Suchen */}
               <div className="px-4 pt-3 pb-2">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted)] mb-2">Häufig gesucht</p>
@@ -261,6 +306,18 @@ export function UniversalSearch({
           ) : (
             <>
               {loading && flat.length <= 1 && <p className="px-4 py-4 text-sm text-[var(--color-muted)]">Suche …</p>}
+              {/* „Meintest du?" — Korrektur bei Tippfehler/Synonym */}
+              {results.didYouMean && (
+                <button type="button" onClick={() => go(results.didYouMean!.href)}
+                  className="flex w-full items-center gap-2 border-b border-[var(--color-border)] px-4 py-2.5 text-left text-sm hover:bg-[var(--color-warmweiss)]">
+                  <svg className="shrink-0 text-[var(--color-donau-blau)]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 12a9 9 0 1 0 9-9M3 12l3-3M3 12l3 3" />
+                  </svg>
+                  <span className="text-[var(--color-muted)]">Meintest du{' '}
+                    <span className="font-semibold text-[var(--color-medizin-navy)]">{results.didYouMean.label}</span>?
+                  </span>
+                </button>
+              )}
               {/* Körperregion-Bridge — prominente erste Zeile */}
               {bodyPartResult && (
                 <div className="py-1 border-b border-[var(--color-border)]">
@@ -275,9 +332,14 @@ export function UniversalSearch({
               {(['disease', 'symptom', 'page'] as const).map((type) => {
                 const items = type === 'disease' ? results.diseases : type === 'symptom' ? results.symptoms : results.pages
                 if (items.length === 0) return null
+                const limit = type === 'disease' ? 6 : type === 'symptom' ? 5 : 4
+                const badge = items.length >= limit ? `${items.length}+` : `${items.length}`
                 return (
                   <div key={type} className="py-1">
-                    <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted)]">{GROUP_META[type].title}</p>
+                    <p className="flex items-center gap-2 px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted)]">
+                      {GROUP_META[type].title}
+                      <span className="rounded-full bg-[var(--color-warmweiss)] border border-[var(--color-border)] px-1.5 py-px text-[10px] font-medium normal-case tracking-normal">{badge}</span>
+                    </p>
                     {items.map((item) => renderRow(item, highlight(item.label, q.trim())))}
                   </div>
                 )
