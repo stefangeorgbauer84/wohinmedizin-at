@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { NavLink } from './NavLink'
+import { SearchTrigger } from './SearchTrigger'
 
 export async function Header() {
   const t = await getTranslations('nav')
@@ -60,8 +61,9 @@ export async function Header() {
             </NavLink>
           </nav>
 
-          {/* Right side: Merkliste + Language switcher + CTA */}
+          {/* Right side: Suche + Merkliste + Language switcher + CTA */}
           <div className="flex items-center gap-3 shrink-0">
+            <SearchTrigger />
             <Link href="/merkliste" aria-label="Meine Merkliste" className="hidden sm:inline-flex p-2 rounded-lg text-[var(--color-muted)] hover:text-[var(--color-selten-violett)] transition-colors">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />

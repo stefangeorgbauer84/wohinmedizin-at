@@ -4,6 +4,7 @@ import { Link } from '@/i18n/navigation'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { getPlatformStats, getFeaturedDiseases } from '@/lib/diseases'
+import { UniversalSearch } from '@/components/UniversalSearch'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://wohinmedizin.at'
 
@@ -125,8 +126,22 @@ export default async function HomePage() {
                 <span className="wohin-gradient-text">{t('hero.headingAccent')}</span>
               </h1>
 
-              <p className="text-lg md:text-xl text-[var(--color-muted)] leading-relaxed mb-8 max-w-2xl">
+              <p className="text-lg md:text-xl text-[var(--color-muted)] leading-relaxed mb-6 max-w-2xl">
                 {t('hero.description')}
+              </p>
+
+              {/* WohinSuche — adaptiver Universal-Eingang (ein Feld für Symptom, Krankheit, Frage) */}
+              <div className="max-w-2xl mb-3">
+                <UniversalSearch />
+              </div>
+              <p className="text-sm text-[var(--color-muted)] mb-2">
+                Tipp einfach, was dich beschäftigt — z.B. <em>„Müdigkeit"</em>, <em>„Marfan"</em> oder <em>„Kassenarzt"</em>.
+              </p>
+              <p className="text-sm mb-8">
+                <Link href="/beschwerden" className="inline-flex items-center gap-1.5 font-medium text-[var(--color-donau-blau)] hover:underline">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><path d="M12 7.5V16M12 11l-5 3M12 11l5 3M9 22l3-6 3 6"/></svg>
+                  Lieber visuell? Auf der Körperkarte die Region wählen →
+                </Link>
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-10">

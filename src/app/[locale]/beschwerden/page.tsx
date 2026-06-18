@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Link } from '@/i18n/navigation'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
+import { BodyMap } from '@/components/BodyMap'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://wohinmedizin.at'
 
@@ -55,7 +56,12 @@ export default function BeschwerdenPage() {
             </Link>
           </div>
 
-          <h2 className="text-lg font-semibold text-[var(--color-medizin-navy)] mb-3">Nach Körperbereich</h2>
+          <h2 className="text-lg font-semibold text-[var(--color-medizin-navy)] mb-4">Nach Körperregion</h2>
+          <div className="rounded-2xl bg-white border border-[var(--color-border)] p-6 mb-6">
+            <BodyMap />
+          </div>
+
+          <p className="text-sm text-[var(--color-muted)] mb-3">Oder direkt wählen:</p>
           <div className="flex flex-wrap gap-2 mb-10">
             {BEREICHE.map((b) => (
               <Link key={b.slug} href={`/selten/bereich/${b.slug}`}
