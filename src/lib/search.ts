@@ -18,7 +18,22 @@ export interface UniversalResults {
   diseases: SearchResult[]
   symptoms: SearchResult[]
   pages: SearchResult[]
+  bodyPart?: { label: string; hub: string; id: string } | null
 }
+
+// Körperregion-Erkennung: Tipp-Begriff → passende BodyMap-Region
+const BODY_PART_MAP: Array<{ keywords: string[]; id: string; hub: string; label: string }> = [
+  { keywords: ['herz', 'kardio', 'gefäß', 'aorta', 'herzrhythmus', 'herzfehler', 'herzklappe'], id: 'brust', hub: 'herz-gefaesse', label: 'Herz & Gefäße' },
+  { keywords: ['lunge', 'atem', 'bronch', 'mukoviszidose', 'lungenfibros'], id: 'lunge', hub: 'atemwege', label: 'Atemwege' },
+  { keywords: ['magen', 'darm', 'leber', 'dünndarm', 'dickdarm', 'bauch', 'gastro'], id: 'bauch', hub: 'magen-darm', label: 'Magen & Darm' },
+  { keywords: ['gehirn', 'nerv', 'kopf', 'neuro', 'epileps', 'migräne', 'ms ', 'multiple sklerose'], id: 'kopf', hub: 'neurologisch', label: 'Kopf & Nerven' },
+  { keywords: ['auge', 'sehen', 'netzhaut', 'makula', 'hornhaut', 'optik'], id: 'augen', hub: 'augen', label: 'Augen' },
+  { keywords: ['ohr', 'hören', 'taubheit', 'gehör', 'vestibular'], id: 'ohren', hub: 'ohren', label: 'Ohren' },
+  { keywords: ['niere', 'harnweg', 'blase', 'urolog'], id: 'niere', hub: 'niere-harnwege', label: 'Niere & Harnwege' },
+  { keywords: ['muskel', 'gelenk', 'knochen', 'skelett', 'rheuma', 'ortho', 'wirbel'], id: 'gelenke', hub: 'bewegungsapparat', label: 'Muskeln & Gelenke' },
+  { keywords: ['haut', 'derma', 'juck', 'blasen', 'ausschlag', 'ekzem'], id: 'haut', hub: 'haut', label: 'Haut' },
+  { keywords: ['ganzkörper', 'multisystem', 'metabol', 'stoffwechsel', 'genetisch'], id: 'ganz', hub: 'multisystemisch', label: 'Ganzer Körper' },
+]
 
 // Statische Seiten/Hilfen, die mitdurchsucht werden (Label + Schlagworte)
 const PAGES: Array<{ label: string; href: string; keywords: string }> = [
@@ -52,8 +67,10 @@ const SYNONYMS: Record<string, string> = {
 
 export async function universalSearch(qRaw: string, locale = 'de'): Promise<UniversalResults> {
   const q = qRaw.trim()
-  if (q.length < 2) return { diseases: [], symptoms: [], pages: [] }
+  if (q.length < 2) return { diseases: [], symptoms: [], pages: [], bodyPart: null }
   const lower = q.toLowerCase()
+  // Körperregion-Erkennung
+  const bodyPart = BODY_PART_MAP.find((b) => b.keywords.some((kw) => lower.includes(kw))) ?? null
   // Synonym-Treffer: Schlüssel als Teilstring der Eingabe?
   const synonymTerm = Object.entries(SYNONYMS).find(([key]) => lower.includes(key))?.[1] ?? null
 
@@ -115,5 +132,5 @@ export async function universalSearch(qRaw: string, locale = 'de'): Promise<Univ
     .slice(0, 4)
     .map((p) => ({ type: 'page' as const, label: p.label, href: p.href }))
 
-  return { diseases, symptoms, pages }
+  return { diseases, symptoms, pages, bodyPart: bodyPart ? { label: bodyPart.label, hub: bodyPart.hub, id: bodyPart.id } : null }
 }

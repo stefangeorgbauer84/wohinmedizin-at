@@ -4,9 +4,15 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from '@/i18n/navigation'
 
 interface Result { type: 'disease' | 'symptom' | 'page'; label: string; sublabel?: string; href: string }
-interface Results { diseases: Result[]; symptoms: Result[]; pages: Result[] }
+interface Results { diseases: Result[]; symptoms: Result[]; pages: Result[]; bodyPart?: { label: string; hub: string; id: string } | null }
 
-const EMPTY: Results = { diseases: [], symptoms: [], pages: [] }
+const EMPTY: Results = { diseases: [], symptoms: [], pages: [], bodyPart: null }
+
+// Kuratierte häufig gesuchte Begriffe — erscheinen im leeren Suchfeld
+const TRENDING = [
+  'Marfan-Syndrom', 'Hämophilie', 'Mukoviszidose', 'Lupus', 'Ehlers-Danlos',
+  'POTS', 'Seltene Lebererkrankung', 'Neurofibromatose',
+]
 const RECENT_KEY = 'wohin:recent'
 
 const GROUP_META: Record<Result['type'], { title: string; icon: React.ReactNode }> = {
@@ -49,6 +55,7 @@ export function UniversalSearch({
   const [recent, setRecent] = useState<Result[]>([])
   const [voiceSupported, setVoiceSupported] = useState(false)
   const [listening, setListening] = useState(false)
+  const [showSlashHint, setShowSlashHint] = useState(false)
   const boxRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const reqRef = useRef(0)
@@ -62,9 +69,19 @@ export function UniversalSearch({
     { type: 'page', label: 'Alle seltenen Erkrankungen', href: '/selten' },
   ]
 
+  const bodyPartResult: Result | null = results.bodyPart
+    ? { type: 'page', label: `Körperkarte: ${results.bodyPart.label}`, sublabel: 'Erkrankungen nach Körperregion filtern', href: `/beschwerden#${results.bodyPart.id}` }
+    : null
+
   const flat: Result[] = isEmpty
     ? [...recent, ...QUICK]
-    : [...results.diseases, ...results.symptoms, ...results.pages, { type: 'page', label: `„${q.trim()}" frei im Navigator beschreiben`, href: `/navigator?q=${encodeURIComponent(q.trim())}` }]
+    : [
+        ...(bodyPartResult ? [bodyPartResult] : []),
+        ...results.diseases,
+        ...results.symptoms,
+        ...results.pages,
+        { type: 'page', label: `„${q.trim()}" frei im Navigator beschreiben`, href: `/navigator?q=${encodeURIComponent(q.trim())}` },
+      ]
 
   const runSearch = useCallback((value: string) => {
     if (value.trim().length < 2) { setResults(EMPTY); setLoading(false); return }
@@ -83,7 +100,13 @@ export function UniversalSearch({
   }
   function go(href: string) { setOpen(false); router.push(href) }
 
-  function onFocus() { setRecent(readRecent()); setOpen(true) }
+  function onFocus() {
+    setRecent(readRecent()); setOpen(true)
+    if (showSlashHint) {
+      setShowSlashHint(false)
+      try { localStorage.setItem('wohin:slash-hint-seen', '1') } catch { /* ignore */ }
+    }
+  }
 
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Escape') { setOpen(false); return }
@@ -107,6 +130,15 @@ export function UniversalSearch({
     const SR = (window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown })
     setVoiceSupported(Boolean(SR.SpeechRecognition || SR.webkitSpeechRecognition))
   }, [])
+
+  // Keyboard-Shortcut-Tooltip beim ersten Besuch (nur einmalig, 4 Sek.)
+  useEffect(() => {
+    if (size !== 'lg') return
+    try {
+      const seen = localStorage.getItem('wohin:slash-hint-seen')
+      if (!seen) { setShowSlashHint(true); const t = setTimeout(() => setShowSlashHint(false), 4000); return () => clearTimeout(t) }
+    } catch { /* ignore */ }
+  }, [size])
 
   function toggleVoice() {
     const w = window as unknown as { SpeechRecognition?: new () => unknown; webkitSpeechRecognition?: new () => unknown }
@@ -163,6 +195,13 @@ export function UniversalSearch({
 
   return (
     <div ref={boxRef} className="relative w-full">
+      {/* Keyboard-Shortcut-Tooltip — erster Besuch */}
+      {showSlashHint && (
+        <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full bg-[var(--color-medizin-navy)] px-3 py-1.5 text-xs text-white shadow-lg animate-fade-in pointer-events-none z-50 whitespace-nowrap">
+          <kbd className="font-mono bg-white/20 rounded px-1 py-0.5">/</kbd>
+          <span>drücken um zu suchen</span>
+        </div>
+      )}
       <div className="relative">
         <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
           <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
@@ -201,7 +240,20 @@ export function UniversalSearch({
                   {recent.map((item) => renderRow(item, item.label))}
                 </div>
               )}
-              <div className="py-1">
+              {/* Trending-Suchen */}
+              <div className="px-4 pt-3 pb-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted)] mb-2">Häufig gesucht</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {TRENDING.map((term) => (
+                    <button key={term} type="button"
+                      onClick={() => { onChange(term); }}
+                      className="text-xs px-2.5 py-1 rounded-full border border-[var(--color-border)] text-[var(--color-medizin-navy)] bg-[var(--color-warmweiss)] hover:border-[var(--color-selten-violett)] hover:text-[var(--color-selten-violett)] transition-colors">
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="py-1 border-t border-[var(--color-border)]">
                 <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted)]">Schnell starten</p>
                 {QUICK.map((item) => renderRow(item, item.label))}
               </div>
@@ -209,6 +261,17 @@ export function UniversalSearch({
           ) : (
             <>
               {loading && flat.length <= 1 && <p className="px-4 py-4 text-sm text-[var(--color-muted)]">Suche …</p>}
+              {/* Körperregion-Bridge — prominente erste Zeile */}
+              {bodyPartResult && (
+                <div className="py-1 border-b border-[var(--color-border)]">
+                  {renderRow(bodyPartResult,
+                    <span className="flex items-center gap-2">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-selten-violett)]">Körperkarte</span>
+                      <span>{bodyPartResult.label.replace('Körperkarte: ', '')}</span>
+                    </span>
+                  )}
+                </div>
+              )}
               {(['disease', 'symptom', 'page'] as const).map((type) => {
                 const items = type === 'disease' ? results.diseases : type === 'symptom' ? results.symptoms : results.pages
                 if (items.length === 0) return null

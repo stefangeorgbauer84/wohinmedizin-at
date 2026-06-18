@@ -49,6 +49,7 @@ const PAGE_SIZE = 24
 export async function listDiseases(opts: {
   q?: string
   organ?: string
+  organs?: string[]
   page?: number
   locale?: string
 }): Promise<DiseaseListResult> {
@@ -61,6 +62,8 @@ export async function listDiseases(opts: {
     'urogenital', 'visual', 'auditory', 'reproductive', 'psychiatric', 'multisystemic', 'oncological',
   ])
   const organ = opts.organ && VALID_ORGANS.has(opts.organ) ? opts.organ : undefined
+  // Schnittmengen-Filter: nur gültige Werte, max. 2 Bereiche
+  const organs = (opts.organs ?? []).filter((o) => VALID_ORGANS.has(o)).slice(0, 2)
   // NaN-Guard: ungültige page-Werte auf 1 zurücksetzen
   const rawPage = opts.page ?? 1
   const page = Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1
@@ -86,6 +89,16 @@ export async function listDiseases(opts: {
       WHERE dos.parent_id = d.id AND dos.value = $${paramIdx++}
     )`
     params.push(organ)
+  }
+  // Schnittmenge: Erkrankung muss ALLE angegebenen Bereiche betreffen
+  if (organs.length > 0) {
+    for (const o of organs) {
+      where += ` AND EXISTS (
+        SELECT 1 FROM diseases_organ_systems dos
+        WHERE dos.parent_id = d.id AND dos.value::text = $${paramIdx++}
+      )`
+      params.push(o)
+    }
   }
 
   const countSql = `

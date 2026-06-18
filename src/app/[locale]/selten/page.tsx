@@ -63,10 +63,10 @@ const ORGAN_HUB_SLUG: Record<string, string> = {
   'Onkologisch': 'onkologisch',
 }
 
-type SearchParams = Promise<{ q?: string; organ?: string; page?: string }>
+type SearchParams = Promise<{ q?: string; organ?: string; organs?: string; page?: string }>
 
-async function DiseaseGrid({ q, organ, page }: { q?: string; organ?: string; page: number }) {
-  const { diseases, total } = await listDiseases({ q, organ, page })
+async function DiseaseGrid({ q, organ, organs, page }: { q?: string; organ?: string; organs?: string[]; page: number }) {
+  const { diseases, total } = await listDiseases({ q, organ, organs, page })
   const totalPages = Math.ceil(total / 24)
 
   if (diseases.length === 0) {
@@ -163,9 +163,14 @@ async function DiseaseGrid({ q, organ, page }: { q?: string; organ?: string; pag
 }
 
 export default async function SeltenPage({ searchParams }: { searchParams: SearchParams }) {
-  const { q, organ, page: pageStr } = await searchParams
+  const { q, organ, organs: organsStr, page: pageStr } = await searchParams
   const parsedPage = parseInt(pageStr ?? '1', 10)
   const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1
+  // Schnittmengen-Filter aus Körperkarte (?organs=cardiovascular,respiratory)
+  // Nur bekannte Organsystem-Werte zulassen, damit Banner und Filter konsistent sind
+  const organs = organsStr
+    ? organsStr.split(',').map((o) => o.trim()).filter((o) => o in ORGAN_LABELS).slice(0, 2)
+    : undefined
 
   return (
     <>
@@ -280,9 +285,23 @@ export default async function SeltenPage({ searchParams }: { searchParams: Searc
               </div>
             )}
 
+            {/* Schnittmengen-Hinweis aus Körperkarte */}
+            {organs && organs.length === 2 && (
+              <div className="mb-6 rounded-xl border border-[var(--color-selten-violett)]/40 bg-[var(--color-morgen-hellblau)] px-4 py-3 flex items-center justify-between gap-3">
+                <p className="text-sm text-[var(--color-medizin-navy)]">
+                  <span className="font-semibold text-[var(--color-selten-violett)]">Schnittmenge:</span>{' '}
+                  Erkrankungen, die <strong>{ORGAN_LABELS[organs[0]] ?? organs[0]}</strong> und{' '}
+                  <strong>{ORGAN_LABELS[organs[1]] ?? organs[1]}</strong> betreffen.
+                </p>
+                <Link href="/selten" className="shrink-0 text-xs text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] underline">
+                  Filter zurücksetzen
+                </Link>
+              </div>
+            )}
+
             {/* Ergebnisse */}
             <Suspense fallback={<div className="py-20 text-center text-[var(--color-muted)]">Lade Erkrankungen…</div>}>
-              <DiseaseGrid q={q} organ={organ} page={page} />
+              <DiseaseGrid q={q} organ={organ} organs={organs} page={page} />
             </Suspense>
           </div>
         </section>

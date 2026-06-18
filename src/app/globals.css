@@ -47,6 +47,18 @@ body {
   background: linear-gradient(135deg, #1E88E5, #7C3AED, #3DDC97);
 }
 
+/* Kurzes Einblenden — z.B. Keyboard-Shortcut-Tooltip in der Suche */
+@keyframes wohin-fade-in {
+  from { opacity: 0; transform: translate(-50%, 4px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+.animate-fade-in {
+  animation: wohin-fade-in 0.25s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in { animation: none; }
+}
+
 /* Druckansicht: Navigation, Footer und interaktive Schaltflächen ausblenden */
 @media print {
   header,
