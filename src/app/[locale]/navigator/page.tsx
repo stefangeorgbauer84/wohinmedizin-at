@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { RED_FLAG_PATTERNS } from '@/lib/red-flags'
 
 interface FachRichtung {
   fachrichtung: string
@@ -20,9 +21,6 @@ interface NavigatorResult {
   naechsteSchritte: string[]
   hinweis: string
 }
-
-// Warnzeichen, die sofortige Hilfe erfordern — clientseitige Vorabprüfung
-const RED_FLAG_PATTERNS = /\b(atemnot|luftnot|ersticke|brustschmerz|herzinfarkt|schlaganfall|lähmung|gelähmt|bewusstlos|ohnmacht|krampfanfall|starke blutung|blute stark|vergiftung|suizid|selbstmord|sehverlust|plötzlich blind|nicht mehr sprechen)\b/i
 
 export default function NavigatorPageClient() {
   const t = useTranslations('navigator')

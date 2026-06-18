@@ -26,6 +26,29 @@ const REGIONS: Region[] = [
   { id: 'ganz', label: 'Ganzer Körper', hub: 'multisystemisch', value: 'multisystemic', hint: 'Erkrankungen, die mehrere Organe betreffen', top: '88%', left: '50%' },
 ]
 
+// Alltagsbegriff → Region (für das Such-/Highlight-Feld unter der Karte)
+const REGION_KEYWORDS: Record<string, string[]> = {
+  kopf: ['kopf', 'gehirn', 'nerv', 'neuro', 'migräne', 'epileps', 'schwindel'],
+  augen: ['auge', 'sehen', 'netzhaut', 'makula', 'blind', 'sicht'],
+  ohren: ['ohr', 'hören', 'gehör', 'taub', 'schwerhörig'],
+  brust: ['herz', 'kardio', 'gefäß', 'aorta', 'puls', 'kreislauf', 'brust'],
+  lunge: ['lunge', 'atem', 'atmung', 'bronch', 'husten', 'luft'],
+  bauch: ['magen', 'darm', 'leber', 'bauch', 'verdauung', 'gastro'],
+  niere: ['niere', 'harn', 'blase', 'urin', 'uro'],
+  gelenke: ['muskel', 'gelenk', 'knochen', 'rücken', 'wirbel', 'rheuma', 'bewegung'],
+  haut: ['haut', 'derma', 'juck', 'ausschlag', 'ekzem', 'blase'],
+  ganz: ['ganz', 'multisystem', 'überall', 'stoffwechsel', 'müde', 'erschöpf'],
+}
+
+function matchRegion(query: string): string | null {
+  const q = query.trim().toLowerCase()
+  if (q.length < 2) return null
+  for (const [id, kws] of Object.entries(REGION_KEYWORDS)) {
+    if (kws.some((kw) => q.includes(kw))) return id
+  }
+  return null
+}
+
 // Heatmap: Intensitätsstufe 0-3 basierend auf Krankheitszahl relativ zum Maximum
 function heatLevel(count: number, max: number): 0 | 1 | 2 | 3 {
   if (!count || !max) return 0
@@ -54,9 +77,12 @@ export function BodyMap({
   const router = useRouter()
   const [hover, setHover] = useState<string | null>(null)
   const [selected, setSelected] = useState<string[]>([])
+  const [filter, setFilter] = useState('')
+  const matchedId = matchRegion(filter)
   const hovered = REGIONS.find((r) => r.id === hover)
-  // Region, deren Detail-Kontext (Beispiel/Co-Region) gezeigt wird: Auswahl hat Vorrang vor Hover
-  const focusId = selected[selected.length - 1] ?? hover
+  // Region, deren Detail-Kontext (Beispiel/Co-Region) gezeigt wird:
+  // Auswahl > Suchtreffer > Hover
+  const focusId = selected[selected.length - 1] ?? matchedId ?? hover
   const focused = REGIONS.find((r) => r.id === focusId)
   const example = focused ? topDisease[focused.value] : undefined
   const coValue = focused ? cooccurrence[focused.value] : undefined
@@ -94,6 +120,24 @@ export function BodyMap({
 
   return (
     <div className="flex flex-col items-center">
+      {/* Such-/Highlight-Feld — tippe einen Begriff, die passende Region pulsiert */}
+      <div className="w-full max-w-sm mb-4 relative">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+        <input
+          type="text" value={filter} onChange={(e) => setFilter(e.target.value)}
+          placeholder="Beschwerde eingeben (z.B. Husten, Sehen, Gelenke) …"
+          aria-label="Körperregion über Begriff finden"
+          className="w-full rounded-xl border border-[var(--color-border)] bg-white pl-9 pr-3 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-selten-violett)]"
+        />
+        {filter.trim().length >= 2 && (
+          <p className="mt-1 px-1 text-xs text-[var(--color-muted)]">
+            {matchedId
+              ? <>Passt zu <strong className="text-[var(--color-selten-violett)]">{REGIONS.find((r) => r.id === matchedId)?.label}</strong> — markiert auf der Karte.</>
+              : 'Keine eindeutige Region — tippe direkt auf die Karte oder nutze den Navigator.'}
+          </p>
+        )}
+      </div>
+
       {/* Dual-Selection-Banner */}
       {selected.length > 0 && (
         <div className="w-full max-w-sm mb-4 rounded-xl border border-[var(--color-selten-violett)]/40 bg-[var(--color-morgen-hellblau)] px-4 py-3 flex items-center justify-between gap-3">
@@ -150,6 +194,7 @@ export function BodyMap({
         {REGIONS.map((r) => {
           const isHovered = hover === r.id
           const isSelected = selected.includes(r.id)
+          const isMatched = matchedId === r.id
           const heat = heatLevel(counts[r.value] ?? 0, maxCount)
           const dotCls = HEAT_DOT[heat]
 
@@ -172,18 +217,18 @@ export function BodyMap({
               onBlur={() => setHover(null)}
               aria-label={`${r.label} — Erkrankungen in diesem Bereich${counts[r.value] ? ` (${counts[r.value]})` : ''}`}
               aria-pressed={isSelected}
-              className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center gap-1.5 rounded-full border bg-white/95 px-2.5 py-1 text-xs font-medium shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-selten-violett)]"
+              className={`absolute -translate-x-1/2 -translate-y-1/2 flex items-center gap-1.5 rounded-full border bg-white/95 px-2.5 py-1 text-xs font-medium shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-selten-violett)] ${isMatched ? 'animate-pulse' : ''}`}
               style={{
                 top: r.top,
                 left: r.left,
-                borderColor: isSelected
+                borderColor: isSelected || isMatched
                   ? 'var(--color-selten-violett)'
                   : isHovered
                     ? 'var(--color-donau-blau)'
                     : 'var(--color-border)',
-                color: isSelected || isHovered ? 'var(--color-selten-violett)' : 'var(--color-medizin-navy)',
-                zIndex: isSelected || isHovered ? 20 : 10,
-                boxShadow: isSelected ? '0 0 0 2px var(--color-selten-violett)' : undefined,
+                color: isSelected || isMatched || isHovered ? 'var(--color-selten-violett)' : 'var(--color-medizin-navy)',
+                zIndex: isSelected || isMatched || isHovered ? 20 : 10,
+                boxShadow: isSelected || isMatched ? '0 0 0 2px var(--color-selten-violett)' : undefined,
               }}
             >
               {/* Heatmap-Dot */}

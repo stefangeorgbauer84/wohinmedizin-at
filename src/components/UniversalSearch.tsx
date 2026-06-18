@@ -2,6 +2,15 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from '@/i18n/navigation'
+import { isRedFlag } from '@/lib/red-flags'
+
+// Kurze Inline-Antworten für häufige Orientierungsfragen (Schlagwort → Antwort + Ziel)
+const QUICK_ANSWERS: Array<{ match: RegExp; answer: string; href: string; cta: string }> = [
+  { match: /kassenarzt|wahlarzt|kasse|selbstbehalt/i, answer: 'Kassenärzt:innen rechnen direkt mit der ÖGK ab. Bei Wahlärzt:innen zahlst du zuerst selbst und bekommst rund 80 % des Kassentarifs zurück.', href: '/wissen/kassenarzt-wahlarzt-unterschied', cta: 'Mehr zum Unterschied' },
+  { match: /überweisung|zuweisung|zuweis/i, answer: 'Für viele Fachärzt:innen brauchst du eine Überweisung der Hausärztin. Manche Fächer (z.B. Gynäkologie, Augen) gehen auch ohne.', href: '/wissen/ueberweisung-oesterreich', cta: 'Überweisung erklärt' },
+  { match: /dermatolog|hautarzt|haut\b/i, answer: 'Zur Dermatologie bei anhaltenden Hautveränderungen, neuen oder wachsenden Muttermalen oder hartnäckigem Juckreiz.', href: '/wissen/wann-zur-dermatologie', cta: 'Wann zur Dermatologie?' },
+  { match: /rheumatolog|rheuma|gelenkschmerz/i, answer: 'Zur Rheumatologie bei länger als 6 Wochen anhaltenden Gelenkschmerzen, Morgensteifigkeit oder Schwellungen.', href: '/wissen/wann-zur-rheumatologie', cta: 'Wann zur Rheumatologie?' },
+]
 
 interface Result { type: 'disease' | 'symptom' | 'page'; label: string; sublabel?: string; href: string }
 interface Results {
@@ -95,6 +104,11 @@ export function UniversalSearch({
     ? { type: 'page', label: `Körperkarte: ${results.bodyPart.label}`, sublabel: 'Erkrankungen nach Körperregion filtern', href: `/beschwerden#${results.bodyPart.id}` }
     : null
 
+  // Notfall-Erkennung — sicherheitskritisch, identische Quelle wie der Navigator
+  const emergency = !isEmpty && isRedFlag(q)
+  // Inline-Schnellantwort für Orientierungsfragen
+  const quickAnswer = !isEmpty ? QUICK_ANSWERS.find((a) => a.match.test(q)) ?? null : null
+
   const flat: Result[] = isEmpty
     ? [...recent, ...QUICK]
     : [
@@ -137,6 +151,16 @@ export function UniversalSearch({
     if (e.key === 'Escape') { setOpen(false); return }
     if (e.key === 'ArrowDown') { e.preventDefault(); setActive((a) => Math.min(a + 1, flat.length - 1)); setOpen(true) }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setActive((a) => Math.max(a - 1, 0)) }
+    else if (e.key === 'ArrowRight' && !isEmpty) {
+      // Pfeil-rechts am Zeilenende übernimmt den Top-Vorschlag (zerstört NICHT die
+      // Tab-Fokusreihenfolge — wichtig für Tastatur-/Screenreader-Nutzung).
+      const el = e.target as HTMLInputElement
+      const atEnd = el.selectionStart === q.length && el.selectionEnd === q.length
+      const top = results.diseases[0] ?? results.symptoms[0]
+      if (atEnd && top && top.label.toLowerCase().startsWith(q.trim().toLowerCase()) && top.label.toLowerCase() !== q.trim().toLowerCase()) {
+        e.preventDefault(); onChange(top.label)
+      }
+    }
     else if (e.key === 'Enter') {
       e.preventDefault()
       if (flat[active]) go(flat[active].href)
@@ -257,6 +281,32 @@ export function UniversalSearch({
 
       {showPanel && (
         <div id="universal-search-list" role="listbox" className="absolute z-50 mt-2 w-full max-h-[62vh] overflow-auto rounded-2xl border border-[var(--color-border)] bg-white shadow-lg">
+          {/* Notfall-Warnung — sicherheitskritisch, immer ganz oben */}
+          {emergency && (
+            <div role="alert" className="flex items-start gap-3 border-b-2 border-red-200 bg-red-50 px-4 py-3">
+              <svg className="mt-0.5 shrink-0 text-red-600" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" />
+              </svg>
+              <div className="text-sm">
+                <p className="font-bold text-red-700">Mögliches Notfallsymptom</p>
+                <p className="text-red-700/90">Bei akuten Beschwerden nicht recherchieren — wähle sofort den Notruf{' '}
+                  <a href="tel:144" className="font-bold underline">144</a> (Rettung) oder geh in die nächste Notaufnahme.</p>
+              </div>
+            </div>
+          )}
+          {/* Inline-Schnellantwort für Orientierungsfragen */}
+          {!isEmpty && quickAnswer && (
+            <div className="border-b border-[var(--color-border)] bg-[var(--color-morgen-hellblau)]/50 px-4 py-3">
+              <div className="flex items-start gap-2">
+                <svg className="mt-0.5 shrink-0 text-[var(--color-donau-blau)]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
+                <div>
+                  <p className="text-sm text-[var(--color-medizin-navy)] leading-relaxed">{quickAnswer.answer}</p>
+                  <button type="button" onClick={() => go(quickAnswer.href)}
+                    className="mt-1.5 text-xs font-medium text-[var(--color-donau-blau)] hover:underline">{quickAnswer.cta} →</button>
+                </div>
+              </div>
+            </div>
+          )}
           {isEmpty ? (
             <>
               {recent.length > 0 && (
@@ -356,7 +406,7 @@ export function UniversalSearch({
 
           {/* Footer: Tastatur-Hinweise + Notruf */}
           <div className="flex items-center justify-between gap-2 border-t border-[var(--color-border)] px-4 py-2 text-[11px] text-[var(--color-muted)]">
-            <span className="hidden sm:inline">↑↓ wählen · ↵ öffnen · Esc schließen</span>
+            <span className="hidden sm:inline">↑↓ wählen · → ergänzen · ↵ öffnen · Esc schließen</span>
             <span className="font-medium text-red-600">Im Notfall: 144</span>
           </div>
         </div>
