@@ -78,6 +78,7 @@ export function BodyMap({
   const [hover, setHover] = useState<string | null>(null)
   const [selected, setSelected] = useState<string[]>([])
   const [filter, setFilter] = useState('')
+  const [copied, setCopied] = useState(false)
   const matchedId = matchRegion(filter)
   const hovered = REGIONS.find((r) => r.id === hover)
   // Region, deren Detail-Kontext (Beispiel/Co-Region) gezeigt wird:
@@ -90,14 +91,34 @@ export function BodyMap({
 
   const maxCount = Math.max(1, ...Object.values(counts))
 
-  // Vorselektion via URL-Hash (z.B. aus WohinSuche: /beschwerden#brust)
+  // Vorselektion wiederherstellen: ?regionen=brust,lunge (geteilter Link) oder #brust (WohinSuche)
   useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get('regionen')
+    if (param) {
+      const ids = param.split(',').map((x) => x.trim()).filter((id) => REGIONS.some((r) => r.id === id)).slice(0, 2)
+      if (ids.length) { setSelected(ids); return }
+    }
     const hash = window.location.hash.replace('#', '')
     if (hash && REGIONS.some((r) => r.id === hash)) {
       setSelected([hash])
       setHover(hash)
     }
   }, [])
+
+  async function shareSelection() {
+    if (!selected.length) return
+    const url = `${window.location.origin}/beschwerden?regionen=${selected.join(',')}`
+    try {
+      const nav = navigator as Navigator & { share?: (d: { url: string; title: string }) => Promise<void> }
+      if (nav.share) {
+        await nav.share({ title: 'WohinMedizin.at — Körperregionen', url })
+      } else {
+        await navigator.clipboard.writeText(url)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }
+    } catch { /* Nutzer hat abgebrochen — kein Fehler nötig */ }
+  }
 
   function toggleSelect(id: string) {
     setSelected((prev) => {
@@ -161,6 +182,10 @@ export function BodyMap({
                 Beide anzeigen →
               </button>
             )}
+            <button type="button" onClick={shareSelection}
+              className="text-xs text-[var(--color-donau-blau)] hover:underline transition-colors text-center">
+              {copied ? 'Link kopiert ✓' : 'Auswahl teilen'}
+            </button>
             <button type="button" onClick={() => setSelected([])}
               className="text-xs text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] transition-colors text-center">
               Auswahl löschen

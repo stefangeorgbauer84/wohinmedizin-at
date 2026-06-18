@@ -108,6 +108,10 @@ export function UniversalSearch({
   const emergency = !isEmpty && isRedFlag(q)
   // Inline-Schnellantwort für Orientierungsfragen
   const quickAnswer = !isEmpty ? QUICK_ANSWERS.find((a) => a.match.test(q)) ?? null : null
+  // Echte Null-Treffer: nichts gefunden, kein Vorschlag, keine Bridge, keine Antwort
+  const noResults = !isEmpty
+    && results.diseases.length === 0 && results.symptoms.length === 0 && results.pages.length === 0
+    && !results.bodyPart && !results.didYouMean && !quickAnswer
 
   const flat: Result[] = isEmpty
     ? [...recent, ...QUICK]
@@ -356,6 +360,31 @@ export function UniversalSearch({
           ) : (
             <>
               {loading && flat.length <= 1 && <p className="px-4 py-4 text-sm text-[var(--color-muted)]">Suche …</p>}
+              {/* Intelligenter Null-Treffer-Zustand */}
+              {!loading && noResults && (
+                <div className="px-4 py-4">
+                  <p className="text-sm text-[var(--color-medizin-navy)]">
+                    Keine direkten Treffer für <strong>„{q.trim()}"</strong>.
+                  </p>
+                  <p className="text-xs text-[var(--color-muted)] mt-1 mb-3">
+                    Tippfehler? Versuche es allgemeiner — oder beschreibe dein Anliegen frei.
+                  </p>
+                  <div className="flex flex-col gap-1.5">
+                    <button type="button" onClick={() => go(`/navigator?q=${encodeURIComponent(q.trim())}`)}
+                      className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-donau-blau)] hover:underline">
+                      → „{q.trim()}" im Navigator beschreiben
+                    </button>
+                    <button type="button" onClick={() => go('/selten')}
+                      className="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)]">
+                      Alle seltenen Erkrankungen durchsuchen
+                    </button>
+                    <a href={`mailto:kontakt@wohinmedizin.at?subject=${encodeURIComponent(`Erkrankung fehlt: ${q.trim()}`)}`}
+                      className="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)]">
+                      Erkrankung fehlt? Melde sie uns
+                    </a>
+                  </div>
+                </div>
+              )}
               {/* „Meintest du?" — Korrektur bei Tippfehler/Synonym */}
               {results.didYouMean && (
                 <button type="button" onClick={() => go(results.didYouMean!.href)}
@@ -394,13 +423,15 @@ export function UniversalSearch({
                   </div>
                 )
               })}
-              {/* Frei-beschreiben-Aktion immer am Ende */}
-              <div className="py-1 border-t border-[var(--color-border)]">
-                {renderRow(
-                  { type: 'page', label: `„${q.trim()}" frei im Navigator beschreiben`, href: `/navigator?q=${encodeURIComponent(q.trim())}` },
-                  <span className="text-[var(--color-donau-blau)]">{`„${q.trim()}" frei im Navigator beschreiben`}</span>,
-                )}
-              </div>
+              {/* Frei-beschreiben-Aktion am Ende (entfällt im Null-Treffer-Zustand, dort schon enthalten) */}
+              {!noResults && (
+                <div className="py-1 border-t border-[var(--color-border)]">
+                  {renderRow(
+                    { type: 'page', label: `„${q.trim()}" frei im Navigator beschreiben`, href: `/navigator?q=${encodeURIComponent(q.trim())}` },
+                    <span className="text-[var(--color-donau-blau)]">{`„${q.trim()}" frei im Navigator beschreiben`}</span>,
+                  )}
+                </div>
+              )}
             </>
           )}
 
