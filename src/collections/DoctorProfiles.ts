@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
+import { publicReadAdminWrite } from '@/access'
 
 export const DoctorProfiles: CollectionConfig = {
   slug: 'doctor-profiles',
+  access: publicReadAdminWrite,
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'specialty', 'region', 'tier', 'verified'],

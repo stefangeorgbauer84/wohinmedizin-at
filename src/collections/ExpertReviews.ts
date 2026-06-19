@@ -1,7 +1,14 @@
 import type { CollectionConfig } from 'payload'
+import { isAdmin } from '@/access'
 
 export const ExpertReviews: CollectionConfig = {
   slug: 'expert-reviews',
+  access: {
+    read: isAdmin,
+    create: isAdmin,
+    update: isAdmin,
+    delete: isAdmin,
+  },
   admin: {
     useAsTitle: 'reviewerName',
     defaultColumns: ['reviewerName', 'reviewerTitle', 'reviewedAt', 'approved'],

@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
+import { publicReadAdminWrite } from '@/access'
 
 export const Specialties: CollectionConfig = {
   slug: 'specialties',
+  access: publicReadAdminWrite,
   admin: {
     useAsTitle: 'name',
   },

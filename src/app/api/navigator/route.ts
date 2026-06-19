@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest } from 'next/server'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -42,6 +43,28 @@ Regeln:
 - Wenn das Anliegen unklar ist: ersteAnlaufstelle = Hausarzt, kurze Begründung warum`
 
 export async function POST(req: NextRequest) {
+  // Rate Limiting — max. 10 Anfragen pro Minute pro IP
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    req.headers.get('x-real-ip') ??
+    'unknown'
+
+  const { allowed, remaining, resetAt } = checkRateLimit(ip, 10, 60_000)
+
+  if (!allowed) {
+    return new Response(
+      JSON.stringify({ error: 'Zu viele Anfragen. Bitte warte eine Minute.' }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(Math.ceil((resetAt - Date.now()) / 1000)),
+          'X-RateLimit-Remaining': '0',
+        },
+      },
+    )
+  }
+
   const { anliegen } = await req.json()
 
   if (!anliegen || typeof anliegen !== 'string' || anliegen.trim().length < 5) {
@@ -51,29 +74,43 @@ export async function POST(req: NextRequest) {
     })
   }
 
+  // Maximale Eingabelänge — verhindert übermäßige API-Kosten und Prompt-Injection-Versuche
+  if (anliegen.trim().length > 1000) {
+    return new Response(JSON.stringify({ error: 'Deine Eingabe ist zu lang (max. 1.000 Zeichen).' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
   const encoder = new TextEncoder()
 
   const stream = new ReadableStream({
     async start(controller) {
-      const response = await client.messages.create({
-        model: 'claude-opus-4-8',
-        max_tokens: 1024,
-        thinking: { type: 'adaptive' },
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: anliegen.trim() }],
-        stream: true,
-      })
+      try {
+        const response = await client.messages.create({
+          model: 'claude-opus-4-8',
+          max_tokens: 1024,
+          thinking: { type: 'adaptive' },
+          system: SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: anliegen.trim() }],
+          stream: true,
+        })
 
-      for await (const event of response) {
-        if (
-          event.type === 'content_block_delta' &&
-          event.delta.type === 'text_delta'
-        ) {
-          controller.enqueue(encoder.encode(event.delta.text))
+        for await (const event of response) {
+          if (
+            event.type === 'content_block_delta' &&
+            event.delta.type === 'text_delta'
+          ) {
+            controller.enqueue(encoder.encode(event.delta.text))
+          }
         }
-      }
 
-      controller.close()
+        controller.close()
+      } catch (err) {
+        // Fehler an den Client melden, statt den Stream stillschweigend zu schließen
+        console.error('Navigator-Stream-Fehler:', err)
+        controller.error(err)
+      }
     },
   })
 

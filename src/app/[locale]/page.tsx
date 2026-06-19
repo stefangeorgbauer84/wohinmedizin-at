@@ -1,10 +1,45 @@
+import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
+import { getPlatformStats, getFeaturedDiseases } from '@/lib/diseases'
+import { UniversalSearch } from '@/components/UniversalSearch'
+import { RecentlyViewed } from '@/components/RecentlyViewed'
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://wohinmedizin.at'
+
+// Allgemein bekannte seltene Erkrankungen für die Startseite (ORPHA-Codes)
+const FEATURED_ORPHA = ['558', '586', '716', '536', '324', '355', '98896', '550']
+
+export const metadata: Metadata = {
+  title: 'WohinMedizin.at — Medizinische Orientierung für Österreich',
+  description:
+    'Finde die richtige Anlaufstelle für dein medizinisches Anliegen: Navigator, Fachärzte, seltene Erkrankungen und Spezialzentren in Österreich.',
+  alternates: { canonical: SITE_URL },
+  openGraph: {
+    title: 'WohinMedizin.at — Medizinische Orientierung für Österreich',
+    description:
+      'Finde die richtige Anlaufstelle für dein medizinisches Anliegen: Navigator, Fachärzte, seltene Erkrankungen und Spezialzentren in Österreich.',
+    url: SITE_URL,
+    siteName: 'WohinMedizin.at',
+    locale: 'de_AT',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'WohinMedizin.at — Medizinische Orientierung für Österreich',
+    description:
+      'Finde die richtige Anlaufstelle für dein medizinisches Anliegen in Österreich.',
+  },
+}
 
 export default async function HomePage() {
   const t = await getTranslations()
+  const [stats, featured] = await Promise.all([
+    getPlatformStats(),
+    getFeaturedDiseases(FEATURED_ORPHA, 'de'),
+  ])
 
   const trustItems = t.raw('trust.items') as Array<{ title: string; text: string }>
   const quickTopicItems = t.raw('quickTopics.items') as string[]
@@ -29,10 +64,49 @@ export default async function HomePage() {
     </svg>,
   ]
 
+  const faqLd = faqs.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(({ q }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `Weitere Informationen zu "${q}" findest du auf WohinMedizin.at.`,
+      },
+    })),
+  } : null
+
+  const organizationLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'WohinMedizin.at',
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.png`,
+    description: 'Medizinische Orientierungsplattform für Österreich',
+    areaServed: { '@type': 'Country', name: 'Austria' },
+    knowsLanguage: ['de', 'en', 'tr', 'ar', 'bs', 'pl', 'ro', 'ru', 'uk'],
+  }
+
+  const websiteLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'WohinMedizin.at',
+    url: SITE_URL,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/selten?q={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
+  }
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }} />
+      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
       <Header />
-      <main className="flex-1">
+      <main id="hauptinhalt" className="flex-1">
 
         {/* ── Hero ── */}
         <section className="relative overflow-hidden bg-[var(--color-morgen-hellblau)]">
@@ -53,8 +127,22 @@ export default async function HomePage() {
                 <span className="wohin-gradient-text">{t('hero.headingAccent')}</span>
               </h1>
 
-              <p className="text-lg md:text-xl text-[var(--color-muted)] leading-relaxed mb-8 max-w-2xl">
+              <p className="text-lg md:text-xl text-[var(--color-muted)] leading-relaxed mb-6 max-w-2xl">
                 {t('hero.description')}
+              </p>
+
+              {/* WohinSuche — adaptiver Universal-Eingang (ein Feld für Symptom, Krankheit, Frage) */}
+              <div className="max-w-2xl mb-3">
+                <UniversalSearch />
+              </div>
+              <p className="text-sm text-[var(--color-muted)] mb-2">
+                Tipp einfach, was dich beschäftigt — z.B. <em>„Müdigkeit"</em>, <em>„Marfan"</em> oder <em>„Kassenarzt"</em>.
+              </p>
+              <p className="text-sm mb-8">
+                <Link href="/beschwerden" className="inline-flex items-center gap-1.5 font-medium text-[var(--color-donau-blau)] hover:underline">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><path d="M12 7.5V16M12 11l-5 3M12 11l5 3M9 22l3-6 3 6"/></svg>
+                  Lieber visuell? Auf der Körperkarte die Region wählen →
+                </Link>
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-10">
@@ -68,7 +156,7 @@ export default async function HomePage() {
                   {t('hero.ctaPrimary')}
                 </Link>
                 <Link
-                  href="/themen"
+                  href="/finden"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white border border-[var(--color-border)] text-[var(--color-medizin-navy)] font-semibold hover:bg-[var(--color-morgen-hellblau)] transition-colors"
                 >
                   {t('hero.ctaSecondary')}
@@ -88,6 +176,9 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ── Weiter, wo du warst (zuletzt angesehen) ── */}
+        <RecentlyViewed />
 
         {/* ── Trust Anchors ── */}
         <section className="bg-white border-b border-[var(--color-border)] py-12">
@@ -181,7 +272,7 @@ export default async function HomePage() {
               {specialties.map((s) => (
                 <Link
                   key={s.href}
-                  href={s.href}
+                  href={s.href.startsWith('/fachrichtungen') ? '/spezialistinnen' : s.href}
                   className="flex flex-col gap-1.5 p-5 rounded-xl bg-white border border-[var(--color-border)] hover:border-[var(--color-donau-blau)] hover:shadow-sm transition-all group"
                 >
                   <span className="text-sm font-semibold text-[var(--color-medizin-navy)] group-hover:text-[var(--color-donau-blau)] transition-colors leading-snug">
@@ -193,7 +284,7 @@ export default async function HomePage() {
             </div>
 
             <div className="mt-8">
-              <Link href="/fachrichtungen" className="text-sm font-medium text-[var(--color-donau-blau)] hover:underline inline-flex items-center gap-1">
+              <Link href="/spezialistinnen" className="text-sm font-medium text-[var(--color-donau-blau)] hover:underline inline-flex items-center gap-1">
                 {t('specialtiesSection.allLink')}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M5 12h14M12 5l7 7-7 7" />
@@ -216,20 +307,63 @@ export default async function HomePage() {
                     {t('rareSection.heading')}
                   </h2>
                   <p className="text-white/80 mb-6 leading-relaxed">{t('rareSection.text')}</p>
-                  <Link
-                    href="/selten"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-[var(--color-selten-violett)] font-semibold text-sm hover:bg-white/90 transition-colors"
-                  >
-                    {t('rareSection.cta')}
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                  </Link>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Link
+                      href="/finden"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-[var(--color-selten-violett)] font-semibold text-sm hover:bg-white/90 transition-colors"
+                    >
+                      Symptom-Finder starten
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                    <Link
+                      href="/selten"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/15 text-white font-semibold text-sm hover:bg-white/25 transition-colors"
+                    >
+                      {t('rareSection.cta')}
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
+
+        {/* ── Häufig gesuchte Erkrankungen (interne Verlinkung + Aktivierung) ── */}
+        {featured.length > 0 && (
+          <section className="py-16 bg-white border-t border-[var(--color-border)]">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="text-xl font-bold text-[var(--color-medizin-navy)] mb-1">Häufig gesuchte Erkrankungen</h2>
+              <p className="text-sm text-[var(--color-muted)] mb-6">Beispiele aus über {stats.diseases.toLocaleString('de-AT')} dokumentierten seltenen Erkrankungen.</p>
+              <div className="flex flex-wrap gap-2">
+                {featured.map((d) => (
+                  <Link key={d.slug} href={`/selten/${d.slug}`}
+                    className="text-sm bg-[var(--color-warmweiss)] border border-[var(--color-border)] text-[var(--color-medizin-navy)] px-3 py-1.5 rounded-full hover:border-[var(--color-selten-violett)] hover:text-[var(--color-selten-violett)] transition-colors">
+                    {d.name}
+                  </Link>
+                ))}
+                <Link href="/selten" className="text-sm font-medium text-[var(--color-donau-blau)] px-3 py-1.5 hover:underline">
+                  Alle ansehen →
+                </Link>
+              </div>
+
+              {/* Trust in Zahlen */}
+              <div className="grid grid-cols-3 gap-6 mt-10 pt-8 border-t border-[var(--color-border)]">
+                {[
+                  { n: stats.diseases.toLocaleString('de-AT'), l: 'seltene Erkrankungen' },
+                  { n: stats.hpo.toLocaleString('de-AT'), l: 'mit Symptomdaten (HPO)' },
+                  { n: stats.icd11.toLocaleString('de-AT'), l: 'mit ICD-11-Code' },
+                ].map((st) => (
+                  <div key={st.l}>
+                    <p className="text-2xl md:text-3xl font-bold wohin-gradient-text">{st.n}</p>
+                    <p className="text-xs text-[var(--color-muted)] mt-1">{st.l}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── FAQs ── */}
         <section className="py-20 bg-[var(--color-warmweiss)]">
@@ -284,15 +418,23 @@ export default async function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href="/fuer-aerzte"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-[var(--color-donau-blau)] text-[var(--color-donau-blau)] font-semibold text-sm hover:bg-[var(--color-morgen-hellblau)] transition-colors"
-                >
-                  {t('forDoctorsSection.cta')}
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M5 12h14M12 5l7 7-7 7" />
-                  </svg>
-                </Link>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/fuer-aerzte"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-[var(--color-donau-blau)] text-[var(--color-donau-blau)] font-semibold text-sm hover:bg-[var(--color-morgen-hellblau)] transition-colors"
+                  >
+                    {t('forDoctorsSection.cta')}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                  <Link
+                    href="/partner"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-[var(--color-donau-blau)] font-semibold text-sm hover:bg-[var(--color-morgen-hellblau)] transition-colors"
+                  >
+                    Partner werden
+                  </Link>
+                </div>
               </div>
 
               <div className="bg-[var(--color-morgen-hellblau)] rounded-2xl p-8 space-y-4">

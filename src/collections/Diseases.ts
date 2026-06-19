@@ -14,6 +14,7 @@
  */
 
 import type { CollectionConfig, CollectionBeforeChangeHook } from 'payload'
+import { publicReadAdminWrite } from '@/access'
 
 const autoTimestampHook: CollectionBeforeChangeHook = ({ data, originalDoc }) => {
   const prev = originalDoc?.status
@@ -29,6 +30,7 @@ const autoTimestampHook: CollectionBeforeChangeHook = ({ data, originalDoc }) =>
 
 export const Diseases: CollectionConfig = {
   slug: 'diseases',
+  access: publicReadAdminWrite,
   hooks: {
     beforeChange: [autoTimestampHook],
   },
@@ -888,6 +890,25 @@ export const Diseases: CollectionConfig = {
         'Diese Informationen dienen der allgemeinen Orientierung und ersetzen keine ärztliche Beratung, Diagnose oder Behandlung. Bei gesundheitlichen Beschwerden oder medizinischen Entscheidungen sollte immer qualifiziertes medizinisches Fachpersonal einbezogen werden.',
       admin: {
         description: 'Pflichttext — jeder Artikel braucht diesen Hinweis.',
+      },
+    },
+    // ── Transparente Förderung (gekennzeichnete Awareness-Inhalte) ──────────────
+    {
+      name: 'sponsorName',
+      type: 'text',
+      label: 'Förderung: Sponsor-Name',
+      admin: {
+        position: 'sidebar',
+        description: 'Falls die Aufbereitung dieses Eintrags gefördert wurde. Wird sichtbar als „Unterstützt durch …" gekennzeichnet. Der Sponsor hat KEINEN Einfluss auf den medizinischen Inhalt — redaktionelle Unabhängigkeit ist Pflicht.',
+      },
+    },
+    {
+      name: 'sponsorUrl',
+      type: 'text',
+      label: 'Förderung: Sponsor-Link',
+      admin: {
+        position: 'sidebar',
+        condition: (data) => Boolean(data.sponsorName),
       },
     },
     {

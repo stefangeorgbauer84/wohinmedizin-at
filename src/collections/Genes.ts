@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
+import { publicReadAdminWrite } from '@/access'
 
 export const Genes: CollectionConfig = {
   slug: 'genes',
+  access: publicReadAdminWrite,
   admin: {
     useAsTitle: 'symbol',
     defaultColumns: ['symbol', 'fullName', 'chromosome', 'updatedAt'],
