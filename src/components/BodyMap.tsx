@@ -151,11 +151,20 @@ export function BodyMap({
           className="w-full rounded-xl border border-[var(--color-border)] bg-white pl-9 pr-3 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-selten-violett)]"
         />
         {filter.trim().length >= 2 && (
-          <p className="mt-1 px-1 text-xs text-[var(--color-muted)]">
-            {matchedId
-              ? <>Passt zu <strong className="text-[var(--color-selten-violett)]">{REGIONS.find((r) => r.id === matchedId)?.label}</strong> — markiert auf der Karte.</>
-              : 'Keine eindeutige Region — tippe direkt auf die Karte oder nutze den Navigator.'}
-          </p>
+          matchedId ? (
+            <p className="mt-1 px-1 text-xs text-[var(--color-muted)]">
+              Passt zu <strong className="text-[var(--color-selten-violett)]">{REGIONS.find((r) => r.id === matchedId)?.label}</strong> — markiert auf der Karte.
+            </p>
+          ) : (
+            <p className="mt-1 px-1 text-xs text-[var(--color-muted)]">
+              Keine eindeutige Region.{' '}
+              <button type="button" onClick={() => router.push(`/selten?q=${encodeURIComponent(filter.trim())}`)}
+                className="text-[var(--color-donau-blau)] hover:underline">„{filter.trim()}" direkt suchen</button>
+              {' '}oder{' '}
+              <button type="button" onClick={() => router.push(`/navigator?q=${encodeURIComponent(filter.trim())}`)}
+                className="text-[var(--color-donau-blau)] hover:underline">im Navigator beschreiben</button>.
+            </p>
+          )
         )}
       </div>
 

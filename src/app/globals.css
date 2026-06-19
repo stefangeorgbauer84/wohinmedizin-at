@@ -57,6 +57,8 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in { animation: none; }
+  /* Pulsieren (Körperkarten-Treffer, Mikrofon) deaktivieren — statische Hervorhebung bleibt */
+  .animate-pulse { animation: none; }
 }
 
 /* Druckansicht: Navigation, Footer und interaktive Schaltflächen ausblenden */

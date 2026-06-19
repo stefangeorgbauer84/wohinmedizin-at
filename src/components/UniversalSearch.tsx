@@ -113,6 +113,20 @@ export function UniversalSearch({
     && results.diseases.length === 0 && results.symptoms.length === 0 && results.pages.length === 0
     && !results.bodyPart && !results.didYouMean && !quickAnswer
 
+  // Screenreader-Ansage der Trefferlage (aria-live)
+  let liveMessage = ''
+  if (!isEmpty && !loading) {
+    if (noResults) {
+      liveMessage = `Keine Treffer für ${q.trim()}.`
+    } else {
+      const parts: string[] = []
+      if (results.diseases.length) parts.push(`${results.diseases.length} Erkrankungen`)
+      if (results.symptoms.length) parts.push(`${results.symptoms.length} Anzeichen`)
+      if (results.pages.length) parts.push(`${results.pages.length} Anlaufstellen`)
+      liveMessage = parts.length ? `${parts.join(', ')} gefunden.` : 'Vorschläge verfügbar.'
+    }
+  }
+
   const flat: Result[] = isEmpty
     ? [...recent, ...QUICK]
     : [
@@ -231,6 +245,7 @@ export function UniversalSearch({
     return (
       <button
         key={`${item.type}-${item.href}-${idx}`}
+        id={`wohin-opt-${idx}`}
         role="option" aria-selected={isActive}
         onMouseEnter={() => setActive(idx)} onClick={() => go(item.href)}
         className={`flex w-full items-center gap-3 px-4 py-2.5 text-left ${isActive ? 'bg-[var(--color-morgen-hellblau)]' : 'hover:bg-[var(--color-warmweiss)]'}`}
@@ -248,6 +263,8 @@ export function UniversalSearch({
 
   return (
     <div ref={boxRef} className="relative w-full">
+      {/* Screenreader-Ansage der Trefferlage */}
+      <div aria-live="polite" role="status" className="sr-only">{liveMessage}</div>
       {/* Keyboard-Shortcut-Tooltip — erster Besuch */}
       {showSlashHint && (
         <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full bg-[var(--color-medizin-navy)] px-3 py-1.5 text-xs text-white shadow-lg animate-fade-in pointer-events-none z-50 whitespace-nowrap">
@@ -261,6 +278,7 @@ export function UniversalSearch({
         </svg>
         <input
           type="text" role="combobox" aria-expanded={showPanel} aria-controls="universal-search-list" aria-autocomplete="list"
+          aria-activedescendant={showPanel && !noResults && flat[active] ? `wohin-opt-${active}` : undefined}
           aria-label="Symptom, Krankheit oder Frage suchen" autoFocus={autoFocus} value={q}
           onChange={(e) => onChange(e.target.value)} onFocus={onFocus} onKeyDown={onKeyDown} placeholder={placeholder}
           className={`w-full rounded-2xl border border-[var(--color-border)] bg-white pl-12 pr-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-selten-violett)] ${size === 'lg' ? 'py-4 text-base shadow-sm' : 'py-2.5 text-sm'}`}
