@@ -176,6 +176,35 @@ export async function listAllCenters(): Promise<CareCenter[]> {
   }
 }
 
+export interface CenterDetail extends CareCenter {
+  description: string | null
+  email: string | null
+  address: string | null
+  orpha_codes: string[]
+}
+
+export async function getCenterBySlug(slug: string): Promise<CenterDetail | null> {
+  const pool = getPool()
+  try {
+    const { rows } = await pool.query<CenterDetail>(
+      `SELECT c.name, c.slug, c.center_type, c.ern_network, c.city, c.website, c.phone, c.country,
+              COALESCE(c.verified, false) AS verified,
+              c.description, c.email, c.address,
+              COALESCE(
+                (SELECT array_agg(oc.code) FROM expert_centers_orpha_codes oc WHERE oc._parent_id = c.id),
+                '{}'
+              ) AS orpha_codes
+       FROM   expert_centers c
+       WHERE  c.slug = $1
+       LIMIT  1`,
+      [slug],
+    )
+    return rows[0] ?? null
+  } catch {
+    return null
+  }
+}
+
 function scopeRank(country: string | null): number {
   switch (country) {
     case 'at': return 0
