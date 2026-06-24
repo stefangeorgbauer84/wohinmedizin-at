@@ -12,12 +12,22 @@ export function FeedbackWidget() {
   const pathname = usePathname()
 
   async function submitFeedback(r: number, c?: string) {
-    await fetch('/api/feedback', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rating: r, comment: c ?? comment, page: pathname }),
-    })
-    setStep('done')
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: r, comment: c ?? comment, page: pathname }),
+      })
+      if (!res.ok) {
+        console.error('Feedback submission failed:', res.status, res.statusText)
+        setStep('closed')
+        return
+      }
+      setStep('done')
+    } catch (err) {
+      console.error('Feedback submission error:', err)
+      setStep('closed')
+    }
   }
 
   return (

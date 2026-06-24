@@ -10,6 +10,12 @@ export async function POST(req: NextRequest) {
   if (typeof rating !== 'number' || rating < 1 || rating > 5) {
     return NextResponse.json({ error: 'Rating 1-5 erforderlich' }, { status: 422 })
   }
+  if (!process.env.RESEND_API_KEY) {
+    return NextResponse.json(
+      { error: 'Server-Konfiguration fehlerhaft. Bitte kontaktiere den Support.' },
+      { status: 500 }
+    )
+  }
   try {
     const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
