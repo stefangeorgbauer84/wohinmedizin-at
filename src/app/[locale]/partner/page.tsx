@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Link } from '@/i18n/navigation'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
+import { PartnerForm } from '@/components/PartnerForm'
 import { getPool } from '@/lib/db'
 import { jsonLdString } from '@/lib/seo'
 
@@ -143,19 +144,18 @@ export default async function PartnerPage() {
         </section>
 
         {/* CTA */}
-        <section className="py-16 bg-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-            <h2 className="text-2xl font-bold text-[var(--color-medizin-navy)] mb-3">Interesse an einer Zusammenarbeit?</h2>
-            <p className="text-[var(--color-muted)] mb-6 max-w-xl mx-auto">
-              Schreiben Sie uns kurz, worum es geht — wir melden uns mit einem konkreten, regelkonformen Vorschlag.
+        <section className="py-16 bg-white" id="kontakt">
+          <div className="max-w-2xl mx-auto px-4 sm:px-6">
+            <h2 className="text-2xl font-bold text-[var(--color-medizin-navy)] mb-3 text-center">
+              Interesse an einer Zusammenarbeit?
+            </h2>
+            <p className="text-[var(--color-muted)] mb-8 text-center">
+              Schreib uns kurz, worum es geht — wir melden uns mit einem konkreten, regelkonformen Vorschlag.
             </p>
-            <a href="mailto:partner@wohinmedizin.at?subject=Partnerschaft%20WohinMedizin.at"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl wohin-gradient text-white font-semibold text-sm hover:opacity-90 transition-opacity">
-              partner@wohinmedizin.at
-            </a>
-            <p className="text-xs text-[var(--color-muted)] mt-6">
-              Keine Publikumswerbung für verschreibungspflichtige Arzneimittel. Alle Inhalte folgen dem österreichischen
-              Arzneimittel- und Werberecht.
+            <PartnerForm />
+            <p className="text-xs text-[var(--color-muted)] text-center mt-6">
+              Keine Publikumswerbung für verschreibungspflichtige Arzneimittel.
+              Alle Inhalte folgen dem österreichischen Arzneimittel- und Werberecht.
             </p>
           </div>
         </section>
