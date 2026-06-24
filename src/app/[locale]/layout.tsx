@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import type { Metadata } from 'next'
 import { PostHogProvider } from '@/components/PostHogProvider'
+import { FeedbackWidget } from '@/components/FeedbackWidget'
 
 type Props = {
   children: React.ReactNode
@@ -54,6 +55,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       <NextIntlClientProvider messages={messages}>
         {children}
       </NextIntlClientProvider>
+      <FeedbackWidget />
     </PostHogProvider>
   )
 }
