@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 const INTEREST_LABELS: Record<string, string> = {
   studien: 'Studien-Hinweise & Rekrutierung',
@@ -23,6 +24,14 @@ export async function POST(req: NextRequest) {
   const ALLOWED_INTEREST = new Set(Object.keys(INTEREST_LABELS))
   if (interest && !ALLOWED_INTEREST.has(interest)) {
     return NextResponse.json({ error: 'Ungültige Interessenangabe.' }, { status: 422 })
+  }
+  if (message.length > 4000) {
+    return NextResponse.json({ error: 'Nachricht zu lang (max. 4000 Zeichen).' }, { status: 422 })
+  }
+  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
+  const rl = checkRateLimit(ip, 5, 60_000)
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Zu viele Anfragen. Bitte versuche es später noch einmal.' }, { status: 429 })
   }
   const interestLabel = INTEREST_LABELS[interest ?? ''] ?? interest ?? 'Nicht angegeben'
   try {

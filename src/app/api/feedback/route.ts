@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
   let body: { rating?: number; comment?: string; page?: string }
@@ -9,6 +10,14 @@ export async function POST(req: NextRequest) {
   const { rating, comment, page } = body
   if (typeof rating !== 'number' || rating < 1 || rating > 5) {
     return NextResponse.json({ error: 'Rating 1-5 erforderlich' }, { status: 422 })
+  }
+  if (comment && comment.length > 2000) {
+    return NextResponse.json({ error: 'Kommentar zu lang (max. 2000 Zeichen).' }, { status: 422 })
+  }
+  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
+  const rl = checkRateLimit(ip, 10, 60_000)
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Zu viele Anfragen. Bitte versuche es später noch einmal.' }, { status: 429 })
   }
   if (!process.env.RESEND_API_KEY) {
     return NextResponse.json(

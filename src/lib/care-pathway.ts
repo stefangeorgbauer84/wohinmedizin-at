@@ -111,7 +111,8 @@ export async function listCenters({
 }: CenterFilterOpts): Promise<{ centers: CareCenter[]; total: number }> {
   const pool = getPool()
   const PAGE_SIZE = 20
-  const offset = (page - 1) * PAGE_SIZE
+  const currentPage = Math.max(1, Math.min(Number.isInteger(page) ? page : 1, 9999))
+  const offset = (currentPage - 1) * PAGE_SIZE
 
   const conditions: string[] = []
   const params: unknown[] = []
@@ -135,6 +136,13 @@ export async function listCenters({
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
 
+  // Separate param arrays: count query uses only filter params,
+  // centers query appends PAGE_SIZE and offset as proper $N parameters.
+  const filterParams = [...params]
+  const limitParam = `$${i}`
+  const offsetParam = `$${i + 1}`
+  const centersParams = [...params, PAGE_SIZE, offset]
+
   try {
     const [centersRes, countRes] = await Promise.all([
       pool.query<CareCenter>(
@@ -143,12 +151,12 @@ export async function listCenters({
          FROM   expert_centers c
          ${where}
          ORDER  BY ${SCOPE_ORDER}, name
-         LIMIT  ${PAGE_SIZE} OFFSET ${offset}`,
-        params,
+         LIMIT  ${limitParam} OFFSET ${offsetParam}`,
+        centersParams,
       ),
       pool.query<{ c: string }>(
         `SELECT count(*) c FROM expert_centers c ${where}`,
-        params,
+        filterParams,
       ),
     ])
     return {

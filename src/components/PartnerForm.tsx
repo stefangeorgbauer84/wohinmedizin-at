@@ -79,7 +79,7 @@ export function PartnerForm() {
       </div>
       <div>
         <label htmlFor="pf-message" className="block text-xs font-medium text-[var(--color-medizin-navy)] mb-1">Kurze Beschreibung *</label>
-        <textarea id="pf-message" name="message" required rows={4}
+        <textarea id="pf-message" name="message" required rows={4} maxLength={4000}
           placeholder="Worum geht es, welche Erkrankung, welcher Zeithorizont?"
           className="w-full rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-donau-blau)] resize-y" />
       </div>

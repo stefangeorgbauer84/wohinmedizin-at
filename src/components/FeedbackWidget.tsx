@@ -73,7 +73,7 @@ export function FeedbackWidget() {
         <div className="bg-white rounded-2xl border border-[var(--color-border)] shadow-lg p-5 w-72">
           <p className="text-sm font-semibold text-[var(--color-medizin-navy)] mb-3">Danke! Noch ein Kommentar?</p>
           <textarea value={comment} onChange={(e) => setComment(e.target.value)}
-            rows={3} placeholder="Optional — was hat geholfen, was fehlte?"
+            rows={3} maxLength={2000} placeholder="Optional — was hat geholfen, was fehlte?"
             className="w-full rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-donau-blau)]" />
           <div className="flex gap-2 mt-3">
             <button onClick={() => submitFeedback(rating)}
