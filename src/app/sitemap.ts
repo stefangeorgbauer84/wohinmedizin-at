@@ -15,6 +15,10 @@ const ORGAN_SLUGS = [
 const WISSEN_SLUGS = [
   'wann-zur-dermatologie', 'wann-zur-rheumatologie', 'wann-reicht-die-hausaerztin',
   'kassenarzt-wahlarzt-unterschied', 'ueberweisung-oesterreich', 'wann-rasch-medizinische-hilfe',
+  'was-ist-eine-seltene-erkrankung', 'diagnose-seltene-erkrankung-oesterreich',
+  'ern-referenznetzwerke-oesterreich', 'patientenorganisationen-seltene-erkrankungen-oesterreich',
+  'chromosomenanomalien-erklaert', 'seltene-erkrankungen-kinder-oesterreich',
+  'seltene-erkrankungen-finanzielle-unterstuetzung', 'lange-diagnoseodyssee-was-tun',
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

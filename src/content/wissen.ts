@@ -79,6 +79,96 @@ export const WISSEN_ARTICLES: WissenArticle[] = [
       { h: 'Orientierung außerhalb der Ordinationszeiten', p: 'Die Gesundheitsberatung 1450 hilft rund um die Uhr bei der Einschätzung, wohin du dich mit deinen Beschwerden wenden solltest.' },
     ],
   },
+  {
+    slug: 'was-ist-eine-seltene-erkrankung',
+    title: 'Was ist eine seltene Erkrankung? Definition und Zahlen in Österreich',
+    description: 'Wann gilt eine Erkrankung als "selten", wie viele Menschen betrifft das in Österreich und was bedeutet ORPHA-Code?',
+    intro: 'Als selten gilt in der EU eine Erkrankung, wenn weniger als 5 von 10.000 Menschen betroffen sind. In Österreich leben dennoch rund 400.000 bis 500.000 Menschen mit einer seltenen Erkrankung.',
+    sections: [
+      { h: 'Die EU-Definition', p: 'Weniger als 5 Betroffene auf 10.000 Einwohner. Bei über 11.000 bekannten seltenen Erkrankungen ist das trotzdem eine riesige Gruppe von Menschen.' },
+      { h: 'ORPHA-Codes: das Ordnungssystem', p: 'Orphanet ist die europäische Referenzdatenbank. Jede seltene Erkrankung erhält einen ORPHA-Code — vergleichbar mit einer Postleitzahl. Diesen Code kennen Spezialzentren und Labore; er erleichtert die Kommunikation zwischen Ärztinnen.' },
+      { h: 'Anlaufstellen in Österreich', p: 'Das Koordinationszentrum für seltene Erkrankungen (KOORDINA) am AKH Wien ist die zentrale österreichische Anlaufstelle. Viele Universitätskliniken führen Spezialambulanzen für einzelne Erkrankungsgruppen.' },
+    ],
+  },
+  {
+    slug: 'diagnose-seltene-erkrankung-oesterreich',
+    title: 'Wie bekommt man eine Diagnose bei seltenen Erkrankungen?',
+    description: 'Die Diagnose bei seltenen Erkrankungen dauert im Schnitt 4 bis 6 Jahre. Welche Wege verkürzen diesen Weg in Österreich?',
+    intro: 'Seltene Erkrankungen sind häufig unerkannt — nicht weil Ärztinnen unaufmerksam sind, sondern weil jede einzelne Erkrankung so selten ist, dass kaum jemand sie aus eigener Erfahrung kennt.',
+    sections: [
+      { h: 'Der erste Schritt: Hausärztin oder Hausarzt', p: 'Die Hausärztin ist die wichtigste erste Anlaufstelle. Sie dokumentiert Beschwerden über Zeit, veranlasst Basisdiagnostik und überweist gezielt. Ein strukturiertes Beschwerdetagebuch hilft dabei enorm.' },
+      { h: 'Spezialisierte Zentren', p: 'Österreich hat mehrere ERN-Mitgliedszentren (Europäische Referenznetzwerke). Diese sind auf bestimmte Erkrankungsgruppen spezialisiert und arbeiten europaweit vernetzt.' },
+      { h: 'Genetische Diagnostik', p: 'Bei Verdacht auf eine genetische seltene Erkrankung kann ein Humangenetiker eine gezielte Paneldiagnostik oder Exom-Sequenzierung veranlassen. Einige Kassen übernehmen diese Kosten nach Überweisung.' },
+      { h: 'Patientenorganisationen als Wegweiser', p: 'Viele österreichische Patientenorganisationen kennen die besten Anlaufstellen für ihre Erkrankung. Eine Kontaktaufnahme dort — auch ohne Diagnose — kann den richtigen Weg zeigen.' },
+    ],
+  },
+  {
+    slug: 'ern-referenznetzwerke-oesterreich',
+    title: 'Europäische Referenznetzwerke (ERN): Österreichische Mitgliedszentren',
+    description: 'Was die EU-weiten ERN-Netzwerke für seltene Erkrankungen bedeuten und welche österreichischen Kliniken Mitglied sind.',
+    intro: 'Die Europäischen Referenznetzwerke (ERN) sind virtuelle Netzwerke hoch spezialisierter Zentren aus der ganzen EU. Sie bündeln Expertise, die in einem einzelnen Land nicht ausreicht.',
+    sections: [
+      { h: 'Was ein ERN-Zentrum bedeutet', p: 'ERN-Mitgliedszentren haben nachgewiesene Expertise, Fallzahlen und Ausstattung für bestimmte Erkrankungsgruppen. Die Aufnahme ist an strenge Kriterien geknüpft.' },
+      { h: 'Österreichische ERN-Mitglieder', p: 'Das AKH Wien, die Medizinische Universität Wien, das LKH Graz und das Kinderspital Linz sind in verschiedenen ERN-Netzwerken vertreten — von seltenen neurologischen bis zu metabolischen Erkrankungen.' },
+      { h: 'Wie du von einem ERN-Zentrum profitierst', p: 'Über das Clinical Patient Management System (CPMS) können Ärztinnen anonymisierte Patientendaten einem europaweiten Expertengremium vorlegen. Eine Überweisung ans ERN-Zentrum stellt in der Regel die behandelnde Ärztin.' },
+    ],
+  },
+  {
+    slug: 'patientenorganisationen-seltene-erkrankungen-oesterreich',
+    title: 'Patientenorganisationen bei seltenen Erkrankungen in Österreich',
+    description: 'Warum Selbsthilfegruppen und Patientenorganisationen bei seltenen Erkrankungen oft mehr wissen als Lehrbücher — und wie man sie findet.',
+    intro: 'Wer mit einer seltenen Erkrankung lebt, ist oft selbst zur Expertin oder zum Experten geworden. Patientenorganisationen bündeln dieses Wissen und helfen bei Diagnose, Versorgung und Alltagsfragen.',
+    sections: [
+      { h: 'Was Patientenorganisationen leisten', p: 'Sie kennen die besten Spezialzentren, begleiten bei Behördengängen, vernetzen Betroffene und vertreten Interessen gegenüber Politik und Krankenkassen.' },
+      { h: 'Wie man eine findet', p: 'Über Orphanet, EURORDIS oder die Selbsthilfe Österreich lassen sich organisierte Gruppen finden. Auf jeder Erkrankungsseite von WohinMedizin.at sind passende österreichische Organisationen verknüpft.' },
+      { h: 'Wenn es noch keine gibt', p: 'Für sehr seltene Erkrankungen gibt es manchmal keine eigene österreichische Organisation. Europäische Gruppen — z.B. unter dem EURORDIS-Dach — können trotzdem wertvolle Anlaufstellen sein.' },
+    ],
+  },
+  {
+    slug: 'chromosomenanomalien-erklaert',
+    title: 'Chromosomenanomalien: Was steckt dahinter?',
+    description: 'Trisomie, Deletion, Duplikation — was Chromosomenanomalien sind, wie sie entstehen und was sie bedeuten.',
+    intro: 'Chromosomenanomalien entstehen, wenn die Anzahl oder Struktur der Chromosomen verändert ist. Viele zählen zu den seltenen Erkrankungen und sind genetisch bedingt.',
+    sections: [
+      { h: 'Arten von Anomalien', p: 'Numerische Anomalien wie das Down-Syndrom (Trisomie 21) bedeuten eine Chromosom-Zahl von 47 statt 46. Strukturelle Anomalien wie Deletionen (fehlende Abschnitte) oder Duplikationen (doppelte Abschnitte) können sehr selten und individuell sein.' },
+      { h: 'Wie sie entstehen', p: 'Meist entstehen Chromosomenanomalien durch Fehler bei der Zellteilung — zufällig, ohne erkennbaren Auslöser. Viele sind nicht erblich.' },
+      { h: 'Diagnostik und nächste Schritte', p: 'Eine Humangenetikerin oder ein Humangenetiker kann durch Chromosomenanalyse oder Array-CGH eine Anomalie nachweisen. Anschließend folgt eine Beratung zu Prognose, Förderung und Unterstützungsangeboten.' },
+    ],
+  },
+  {
+    slug: 'seltene-erkrankungen-kinder-oesterreich',
+    title: 'Seltene Erkrankungen bei Kindern: Anlaufstellen in Österreich',
+    description: 'Die meisten seltenen Erkrankungen zeigen sich in der Kindheit. Welche Kindermedizin-Zentren in Österreich spezialisiert sind.',
+    intro: 'Rund 70 Prozent aller seltenen Erkrankungen beginnen in der Kindheit. Pädiatrische Spezialzentren sind deshalb die wichtigsten Anlaufstellen für betroffene Familien.',
+    sections: [
+      { h: 'Kinderkliniken mit Spezialkompetenz', p: 'Das Universitätsklinikum für Kinder- und Jugendheilkunde Wien (AKH), die Kinderklinik Graz und das Kepler Universitätsklinikum Linz bieten pädiatrische Spezialambulanzen für viele seltene Erkrankungsgruppen.' },
+      { h: 'Der Übergang ins Erwachsenenalter', p: 'Die "Transition" — der Wechsel von pädiatrischen zu Erwachsenen-Zentren — ist ein kritischer Moment. Spezialisierte Übergangs-Kliniken begleiten diesen Schritt strukturiert.' },
+      { h: 'Unterstützung für Familien', p: 'Organisationen wie viele Selbsthilfegruppen unterstützen Familien nicht nur medizinisch, sondern auch bei Alltagsfragen, Behördengängen und emotionaler Begleitung.' },
+    ],
+  },
+  {
+    slug: 'seltene-erkrankungen-finanzielle-unterstuetzung',
+    title: 'Finanzielle Unterstützung bei seltenen Erkrankungen in Österreich',
+    description: 'Pflegegeld, erhöhte Familienbeihilfe, Härtefallfonds und Sachleistungen — welche Unterstützung Betroffenen zusteht.',
+    intro: 'Seltene Erkrankungen bedeuten oft erhöhten Pflegebedarf, teure Medikamente und Therapien oder behinderungsbedingte Mehrkosten. Österreich bietet mehrere Unterstützungssysteme.',
+    sections: [
+      { h: 'Pflegegeld', p: 'Ab einem Pflegebedarf von mehr als 65 Stunden im Monat steht Pflegegeld zu — in 7 Stufen. Die Einstufung erfolgt durch den Medizinischen Dienst der Krankenkasse.' },
+      { h: 'Erhöhte Familienbeihilfe', p: 'Familien mit erheblich behinderten Kindern erhalten erhöhte Familienbeihilfe — unabhängig vom Einkommen — plus den Kinderabsetzbetrag.' },
+      { h: 'Härtefallfonds und Krankenkasse', p: 'Für teure Orphan Drugs (Arzneimittel für seltene Erkrankungen) gibt es Sonderregelungen der Krankenkassen und einen Härtefallfonds beim BMSGPK. Eine Sozialberatung der jeweiligen Patientenorganisation kennt die aktuellen Wege.' },
+    ],
+  },
+  {
+    slug: 'lange-diagnoseodyssee-was-tun',
+    title: 'Lange Diagnoseodyssee — was tun, wenn Ärzte nicht weiterkommen?',
+    description: 'Wenn Beschwerden seit Jahren ungeklärt sind: konkrete nächste Schritte, Zweitmeinungen und spezialisierte Anlaufstellen in Österreich.',
+    intro: 'Die durchschnittliche Diagnoseodyssee bei seltenen Erkrankungen dauert 4 bis 6 Jahre. Das ist kein Versagen — es liegt an der Seltenheit dieser Erkrankungen. Aber es gibt Wege, diesen Weg zu verkürzen.',
+    sections: [
+      { h: 'Symptomtagebuch führen', p: 'Schreibe täglich Symptome, Schweregrad, Trigger und Verlauf auf. Ein strukturiertes Tagebuch über mehrere Monate hilft Spezialzentren bei der Einordnung enorm.' },
+      { h: 'Zweitmeinung einholen', p: 'Eine Zweitmeinung — im Idealfall an einem Universitätsklinikum oder ERN-Zentrum — ist kein Vertrauensbruch gegenüber der bisherigen Ärztin. In Österreich ist sie als Patient:in ausdrücklich möglich.' },
+      { h: 'KOORDINA-Zentrum anfragen', p: 'Das Koordinationszentrum für seltene Erkrankungen am AKH Wien (KOORDINA) hilft explizit bei ungeklärten Fällen — auch ohne vollständige Diagnose. Die Überweisung erfolgt durch die Hausärztin.' },
+      { h: 'Patientenorganisationen früh einbeziehen', p: 'Auch ohne Diagnose kann eine thematisch passende Patientenorganisation erfahrungsbasierte Hinweise geben, welche Zentren und Tests relevant sein könnten.' },
+    ],
+  },
 ]
 
 export function getWissenArticle(slug: string): WissenArticle | undefined {
