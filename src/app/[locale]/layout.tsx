@@ -20,6 +20,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   for (const loc of routing.locales) {
     hreflangAlternates[loc] = loc === 'de' ? SITE_URL : `${SITE_URL}/${loc}`
   }
+  // Austria-specific variant: de-AT points to same URL as de (default)
+  hreflangAlternates['de-AT'] = SITE_URL
+  // x-default points to German version (default locale)
   hreflangAlternates['x-default'] = SITE_URL
 
   return {
