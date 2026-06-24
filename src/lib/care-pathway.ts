@@ -96,6 +96,70 @@ export async function findMatchingOrganizations(
   }
 }
 
+export interface CenterFilterOpts {
+  q?: string
+  type?: string
+  country?: string
+  page?: number
+}
+
+export async function listCenters({
+  q,
+  type,
+  country,
+  page = 1,
+}: CenterFilterOpts): Promise<{ centers: CareCenter[]; total: number }> {
+  const pool = getPool()
+  const PAGE_SIZE = 20
+  const offset = (page - 1) * PAGE_SIZE
+
+  const conditions: string[] = []
+  const params: unknown[] = []
+  let i = 1
+
+  if (q && q.trim()) {
+    conditions.push(`(c.name ILIKE $${i} OR c.city ILIKE $${i} OR c.ern_network ILIKE $${i})`)
+    params.push(`%${q.trim()}%`)
+    i++
+  }
+  if (type) {
+    conditions.push(`c.center_type = $${i}`)
+    params.push(type)
+    i++
+  }
+  if (country) {
+    conditions.push(`c.country = $${i}`)
+    params.push(country)
+    i++
+  }
+
+  const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+
+  try {
+    const [centersRes, countRes] = await Promise.all([
+      pool.query<CareCenter>(
+        `SELECT name, slug, center_type, ern_network, city, website, phone, country,
+                COALESCE(verified, false) AS verified
+         FROM   expert_centers c
+         ${where}
+         ORDER  BY ${SCOPE_ORDER}, name
+         LIMIT  ${PAGE_SIZE} OFFSET ${offset}`,
+        params,
+      ),
+      pool.query<{ c: string }>(
+        `SELECT count(*) c FROM expert_centers c ${where}`,
+        params,
+      ),
+    ])
+    return {
+      centers: centersRes.rows,
+      total: parseInt(countRes.rows[0]?.c ?? '0', 10),
+    }
+  } catch {
+    return { centers: [], total: 0 }
+  }
+}
+
 /** Alle Spezialzentren (für das Verzeichnis), Österreich zuerst. */
 export async function listAllCenters(): Promise<CareCenter[]> {
   const pool = getPool()
