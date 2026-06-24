@@ -20,6 +20,10 @@ export async function POST(req: NextRequest) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: 'Ungültige E-Mail-Adresse.' }, { status: 422 })
   }
+  const ALLOWED_INTEREST = new Set(Object.keys(INTEREST_LABELS))
+  if (interest && !ALLOWED_INTEREST.has(interest)) {
+    return NextResponse.json({ error: 'Ungültige Interessenangabe.' }, { status: 422 })
+  }
   const interestLabel = INTEREST_LABELS[interest ?? ''] ?? interest ?? 'Nicht angegeben'
   try {
     const resend = new Resend(process.env.RESEND_API_KEY)
