@@ -2,17 +2,15 @@ import type { Metadata } from 'next'
 import { Link } from '@/i18n/navigation'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
-import { listAllCenters } from '@/lib/care-pathway'
+import { listCenters } from '@/lib/care-pathway'
 import { VerifiedBadge } from '@/components/VerifiedBadge'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://wohinmedizin.at'
-
 export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Spezialzentren für seltene Erkrankungen in Österreich — WohinMedizin.at',
-  description:
-    'Verzeichnis österreichischer Referenz- und Spezialzentren für seltene Erkrankungen, inklusive ERN-Anbindung und Kontakt.',
+  description: 'Durchsuchbares Verzeichnis österreichischer Referenz- und Spezialzentren für seltene Erkrankungen, inklusive ERN-Anbindung und Kontakt.',
   alternates: { canonical: `${SITE_URL}/spezialistinnen` },
 }
 
@@ -23,10 +21,25 @@ const CENTER_TYPE_LABELS: Record<string, string> = {
   outpatient: 'Spezialambulanz',
   selfhelp: 'Selbsthilfezentrum',
 }
-const COUNTRY_LABELS: Record<string, string> = { at: 'Österreich', de: 'Deutschland', ch: 'Schweiz', eu_other: 'EU' }
+const COUNTRY_LABELS: Record<string, string> = {
+  at: 'Österreich', de: 'Deutschland', ch: 'Schweiz', eu_other: 'EU',
+}
 
-export default async function SpezialistinnenPage() {
-  const centers = await listAllCenters()
+type SearchParams = Promise<{ q?: string; type?: string; country?: string; page?: string }>
+
+export default async function SpezialistinnenPage({ searchParams }: { searchParams: SearchParams }) {
+  const { q, type, country, page } = await searchParams
+  const currentPage = parseInt(page ?? '1', 10)
+  const { centers, total } = await listCenters({ q, type, country, page: currentPage })
+  const totalPages = Math.ceil(total / 20)
+
+  const buildUrl = (overrides: Record<string, string | undefined>) => {
+    const params = new URLSearchParams()
+    const merged = { q, type, country, ...overrides }
+    Object.entries(merged).forEach(([k, v]) => { if (v) params.set(k, v) })
+    const str = params.toString()
+    return `/spezialistinnen${str ? `?${str}` : ''}`
+  }
 
   return (
     <>
@@ -36,40 +49,87 @@ export default async function SpezialistinnenPage() {
           <h1 className="text-3xl md:text-4xl font-bold text-[var(--color-medizin-navy)] mb-3">
             Spezialzentren in Österreich
           </h1>
-          <p className="text-[var(--color-muted)] leading-relaxed mb-8 max-w-2xl">
-            Referenz- und Spezialzentren für seltene Erkrankungen. Eine Überweisung erfolgt in der Regel über die
-            Hausärztin oder den Hausarzt. Auf jeder Krankheitsseite findest du die jeweils passenden Zentren.
+          <p className="text-[var(--color-muted)] leading-relaxed mb-6 max-w-2xl">
+            Referenz- und Spezialzentren für seltene Erkrankungen. Eine Überweisung erfolgt in der Regel
+            über die Hausärztin oder den Hausarzt.
+          </p>
+
+          <form method="GET" action="/spezialistinnen" className="flex flex-col sm:flex-row gap-3 mb-6">
+            <input
+              type="search"
+              name="q"
+              defaultValue={q ?? ''}
+              placeholder="Nach Name, Stadt oder ERN-Netzwerk suchen …"
+              className="flex-1 rounded-xl border border-[var(--color-border)] px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-donau-blau)]"
+            />
+            <select name="type" defaultValue={type ?? ''}
+              className="rounded-xl border border-[var(--color-border)] px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-donau-blau)]">
+              <option value="">Alle Typen</option>
+              {Object.entries(CENTER_TYPE_LABELS).map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </select>
+            <select name="country" defaultValue={country ?? ''}
+              className="rounded-xl border border-[var(--color-border)] px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-donau-blau)]">
+              <option value="">Alle Länder</option>
+              {Object.entries(COUNTRY_LABELS).map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </select>
+            <button type="submit"
+              className="px-5 py-2.5 rounded-xl wohin-gradient text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+              Suchen
+            </button>
+          </form>
+
+          <p className="text-xs text-[var(--color-muted)] mb-4">
+            {total} {total === 1 ? 'Zentrum' : 'Zentren'} gefunden
           </p>
 
           {centers.length === 0 ? (
             <div className="rounded-xl bg-white border border-[var(--color-border)] p-6 text-sm text-[var(--color-muted)]">
-              Das Verzeichnis wird gerade aufgebaut. Durchsuche in der Zwischenzeit die{' '}
-              <Link href="/selten" className="text-[var(--color-donau-blau)] underline">Krankheitsübersicht</Link>.
+              Keine Zentren gefunden. Passe deine Suche an oder{' '}
+              <Link href="/spezialistinnen" className="text-[var(--color-donau-blau)] underline">
+                alle anzeigen
+              </Link>.
             </div>
           ) : (
             <ul className="space-y-3">
               {centers.map((c) => (
-                <li key={c.slug ?? c.name} className="bg-white rounded-xl border border-[var(--color-border)] p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-[var(--color-medizin-navy)] flex items-center gap-2 flex-wrap">
-                        {c.name}
-                        {c.verified && <VerifiedBadge />}
-                      </p>
-                      <p className="text-xs text-[var(--color-muted)] mt-1">
-                        {[CENTER_TYPE_LABELS[c.center_type ?? ''] ?? c.center_type, c.ern_network, c.city, COUNTRY_LABELS[c.country ?? ''] ?? c.country].filter(Boolean).join(' · ')}
-                      </p>
+                <li key={c.slug ?? c.name}>
+                  {c.slug ? (
+                    <Link href={`/spezialistinnen/${c.slug}`}
+                      className="block bg-white rounded-xl border border-[var(--color-border)] p-5 hover:border-[var(--color-donau-blau)] hover:shadow-sm transition-all">
+                      <CenterCard c={c} />
+                    </Link>
+                  ) : (
+                    <div className="bg-white rounded-xl border border-[var(--color-border)] p-5">
+                      <CenterCard c={c} />
                     </div>
-                    {c.website && (
-                      <a href={c.website} target="_blank" rel="noopener noreferrer"
-                        className="shrink-0 text-xs text-[var(--color-donau-blau)] hover:underline whitespace-nowrap">
-                        Website ↗
-                      </a>
-                    )}
-                  </div>
+                  )}
                 </li>
               ))}
             </ul>
+          )}
+
+          {totalPages > 1 && (
+            <nav aria-label="Seiten" className="flex gap-2 mt-8 justify-center">
+              {currentPage > 1 && (
+                <Link href={buildUrl({ page: String(currentPage - 1) })}
+                  className="px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm hover:border-[var(--color-donau-blau)]">
+                  Zurueck
+                </Link>
+              )}
+              <span className="px-4 py-2 text-sm text-[var(--color-muted)]">
+                Seite {currentPage} von {totalPages}
+              </span>
+              {currentPage < totalPages && (
+                <Link href={buildUrl({ page: String(currentPage + 1) })}
+                  className="px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm hover:border-[var(--color-donau-blau)]">
+                  Weiter
+                </Link>
+              )}
+            </nav>
           )}
 
           <div className="mt-10 rounded-xl bg-[var(--color-morgen-hellblau)] border border-[var(--color-border)] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -77,12 +137,41 @@ export default async function SpezialistinnenPage() {
               Ihr Zentrum ist nicht gelistet oder die Angaben sind veraltet?
             </p>
             <Link href="/partner" className="shrink-0 text-sm font-semibold text-[var(--color-donau-blau)] hover:underline">
-              Profil eintragen oder verifizieren lassen →
+              Profil eintragen oder verifizieren lassen
             </Link>
           </div>
         </div>
       </main>
       <Footer />
     </>
+  )
+}
+
+function CenterCard({ c }: { c: import('@/lib/care-pathway').CareCenter }) {
+  const TYPE_LABELS: Record<string, string> = {
+    ern: 'ERN', national_ref: 'Nationales Referenzzentrum', university: 'Universitätsklinik',
+    outpatient: 'Spezialambulanz', selfhelp: 'Selbsthilfezentrum',
+  }
+  const CTRY: Record<string, string> = { at: 'Österreich', de: 'Deutschland', ch: 'Schweiz', eu_other: 'EU' }
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        <p className="font-semibold text-[var(--color-medizin-navy)] flex items-center gap-2 flex-wrap">
+          {c.name}
+          {c.verified && <VerifiedBadge />}
+        </p>
+        <p className="text-xs text-[var(--color-muted)] mt-1">
+          {[TYPE_LABELS[c.center_type ?? ''] ?? c.center_type, c.ern_network, c.city,
+            CTRY[c.country ?? ''] ?? c.country].filter(Boolean).join(' · ')}
+        </p>
+      </div>
+      {c.website && (
+        <a href={c.website} target="_blank" rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="shrink-0 text-xs text-[var(--color-donau-blau)] hover:underline whitespace-nowrap">
+          Website
+        </a>
+      )}
+    </div>
   )
 }
