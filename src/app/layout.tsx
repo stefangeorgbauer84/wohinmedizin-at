@@ -25,7 +25,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} dir={dir} className={`${inter.variable} h-full`} suppressHydrationWarning>
       <head>
         {plausibleDomain && (
-          // eslint-disable-next-line @next/next/no-sync-scripts
           <script defer data-domain={plausibleDomain} src="https://plausible.io/js/script.js" />
         )}
       </head>
