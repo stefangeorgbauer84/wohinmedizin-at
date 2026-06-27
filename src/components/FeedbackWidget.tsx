@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { Card } from './ui'
 
 type Step = 'closed' | 'rating' | 'comment' | 'done'
 
@@ -31,7 +32,7 @@ export function FeedbackWidget() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50" aria-live="polite">
+    <div className="fixed bottom-20 right-6 z-50" aria-live="polite">
       {step === 'closed' && (
         <button
           onClick={() => setStep('rating')}
@@ -46,12 +47,12 @@ export function FeedbackWidget() {
       )}
 
       {step === 'rating' && (
-        <div className="bg-white rounded-2xl border border-[var(--color-border)] shadow-lg p-5 w-72">
+        <Card variant="elevated" className="p-5 w-72">
           <div className="flex justify-between items-center mb-3">
             <p className="text-sm font-semibold text-[var(--color-medizin-navy)]">War diese Seite hilfreich?</p>
             <button onClick={() => setStep('closed')} aria-label="Schließen"
               className="text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] w-6 h-6 flex items-center justify-center rounded">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
@@ -66,13 +67,14 @@ export function FeedbackWidget() {
             ))}
           </div>
           <p className="text-xs text-[var(--color-muted)] text-center mt-2">1 = wenig hilfreich · 5 = sehr hilfreich</p>
-        </div>
+        </Card>
       )}
 
       {step === 'comment' && rating !== null && (
-        <div className="bg-white rounded-2xl border border-[var(--color-border)] shadow-lg p-5 w-72">
+        <Card variant="elevated" className="p-5 w-72">
           <p className="text-sm font-semibold text-[var(--color-medizin-navy)] mb-3">Danke! Noch ein Kommentar?</p>
-          <textarea value={comment} onChange={(e) => setComment(e.target.value)}
+          <label htmlFor="feedback-comment" className="sr-only">Kommentar (optional)</label>
+          <textarea id="feedback-comment" value={comment} onChange={(e) => setComment(e.target.value)}
             rows={3} maxLength={2000} placeholder="Optional — was hat geholfen, was fehlte?"
             className="w-full rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-donau-blau)]" />
           <div className="flex gap-2 mt-3">
@@ -85,13 +87,13 @@ export function FeedbackWidget() {
               Schließen
             </button>
           </div>
-        </div>
+        </Card>
       )}
 
       {step === 'done' && (
-        <div className="bg-white rounded-2xl border border-[var(--color-border)] shadow-md p-4 w-64 text-sm text-[var(--color-medizin-navy)] text-center">
+        <Card variant="elevated" className="p-4 w-64 text-sm text-[var(--color-medizin-navy)] text-center">
           Danke für dein Feedback.
-        </div>
+        </Card>
       )}
     </div>
   )
