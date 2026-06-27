@@ -28,10 +28,13 @@ export async function POST(req: NextRequest) {
   if (message.length > 4000) {
     return NextResponse.json({ error: 'Nachricht zu lang (max. 4000 Zeichen).' }, { status: 422 })
   }
-  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  const rl = checkRateLimit(ip, 5, 60_000)
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? req.headers.get('x-real-ip') ?? 'anonymous'
+  const rl = await checkRateLimit(`api:${ip}`)
   if (!rl.allowed) {
-    return NextResponse.json({ error: 'Zu viele Anfragen. Bitte versuche es später noch einmal.' }, { status: 429 })
+    return NextResponse.json(
+      { error: 'Zu viele Anfragen. Bitte versuche es später noch einmal.', retryAfter: rl.resetAt },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+    )
   }
   const interestLabel = INTEREST_LABELS[interest ?? ''] ?? interest ?? 'Nicht angegeben'
   try {

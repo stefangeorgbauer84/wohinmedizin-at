@@ -14,10 +14,13 @@ export async function POST(req: NextRequest) {
   if (comment && comment.length > 2000) {
     return NextResponse.json({ error: 'Kommentar zu lang (max. 2000 Zeichen).' }, { status: 422 })
   }
-  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  const rl = checkRateLimit(ip, 10, 60_000)
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? req.headers.get('x-real-ip') ?? 'anonymous'
+  const rl = await checkRateLimit(`api:${ip}`)
   if (!rl.allowed) {
-    return NextResponse.json({ error: 'Zu viele Anfragen. Bitte versuche es später noch einmal.' }, { status: 429 })
+    return NextResponse.json(
+      { error: 'Zu viele Anfragen. Bitte versuche es später noch einmal.', retryAfter: rl.resetAt },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+    )
   }
   if (!process.env.RESEND_API_KEY) {
     return NextResponse.json(

@@ -43,22 +43,22 @@ Regeln:
 - Wenn das Anliegen unklar ist: ersteAnlaufstelle = Hausarzt, kurze Begründung warum`
 
 export async function POST(req: NextRequest) {
-  // Rate Limiting — max. 10 Anfragen pro Minute pro IP
+  // Rate Limiting — max. 30 Anfragen pro Minute pro IP (Upstash sliding window)
   const ip =
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     req.headers.get('x-real-ip') ??
-    'unknown'
+    'anonymous'
 
-  const { allowed, remaining, resetAt } = checkRateLimit(ip, 10, 60_000)
+  const rl = await checkRateLimit(`api:${ip}`)
 
-  if (!allowed) {
+  if (!rl.allowed) {
     return new Response(
       JSON.stringify({ error: 'Zu viele Anfragen. Bitte warte eine Minute.' }),
       {
         status: 429,
         headers: {
           'Content-Type': 'application/json',
-          'Retry-After': String(Math.ceil((resetAt - Date.now()) / 1000)),
+          'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
           'X-RateLimit-Remaining': '0',
         },
       },
