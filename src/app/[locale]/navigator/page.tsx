@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { RED_FLAG_PATTERNS } from '@/lib/red-flags'
 
 interface FachRichtung {
@@ -87,7 +88,7 @@ export default function NavigatorPageClient() {
       {/* Header */}
       <header style={{ backgroundColor: '#123047' }} className="px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <span
               className="text-xl font-bold"
               style={{
@@ -98,7 +99,7 @@ export default function NavigatorPageClient() {
             >
               {t('backToHome')}
             </span>
-          </a>
+          </Link>
           <span className="text-sm" style={{ color: '#3DDC97' }}>
             {t('label')}
           </span>
@@ -130,7 +131,7 @@ export default function NavigatorPageClient() {
           <span>
             Deine Eingabe wird zur Verarbeitung an Anthropic (USA) übertragen. Gib keine identifizierenden Informationen (Name, Adresse, Geburtsdatum) ein.
             Weitere Informationen findest du in unserer{' '}
-            <a href="/datenschutz" className="underline hover:opacity-80">Datenschutzerklärung</a>.
+            <Link href="/datenschutz" className="underline hover:opacity-80">Datenschutzerklärung</Link>.
           </span>
         </div>
 
@@ -360,18 +361,18 @@ export default function NavigatorPageClient() {
                 Weiter auf WohinMedizin
               </span>
               <div className="flex flex-col gap-2">
-                <a href="/finden" className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors" style={{ backgroundColor: '#F3FAFF', color: '#123047' }}>
+                <Link href="/finden" className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors" style={{ backgroundColor: '#F3FAFF', color: '#123047' }}>
                   <span>Anzeichen auswählen und mögliche Erkrankungen finden</span>
                   <span aria-hidden="true">→</span>
-                </a>
-                <a href={`/selten?q=${encodeURIComponent(anliegen.trim().slice(0, 60))}`} className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors" style={{ backgroundColor: '#F3FAFF', color: '#123047' }}>
+                </Link>
+                <Link href={`/selten?q=${encodeURIComponent(anliegen.trim().slice(0, 60))}`} className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors" style={{ backgroundColor: '#F3FAFF', color: '#123047' }}>
                   <span>Krankheitsdatenbank zu deinem Anliegen durchsuchen</span>
                   <span aria-hidden="true">→</span>
-                </a>
-                <a href="/spezialistinnen" className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors" style={{ backgroundColor: '#F3FAFF', color: '#123047' }}>
+                </Link>
+                <Link href="/spezialistinnen" className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors" style={{ backgroundColor: '#F3FAFF', color: '#123047' }}>
                   <span>Spezialist:innen & Zentren in Österreich ansehen</span>
                   <span aria-hidden="true">→</span>
-                </a>
+                </Link>
               </div>
             </div>
 

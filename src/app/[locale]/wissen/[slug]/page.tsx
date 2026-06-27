@@ -4,6 +4,7 @@ import { Link } from '@/i18n/navigation'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { WISSEN_ARTICLES, getWissenArticle } from '@/content/wissen'
+import { jsonLdString } from '@/lib/seo'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://wohinmedizin.at'
 
@@ -46,8 +47,8 @@ export default async function WissenArticlePage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(faqLd) }} />
       <Header />
       <main id="hauptinhalt" className="flex-1 bg-white">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">

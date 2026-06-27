@@ -136,7 +136,7 @@ export default async function HomePage() {
                 <UniversalSearch />
               </div>
               <p className="text-sm text-[var(--color-muted)] mb-2">
-                Tipp einfach, was dich beschäftigt — z.B. <em>„Müdigkeit"</em>, <em>„Marfan"</em> oder <em>„Kassenarzt"</em>.
+                Tipp einfach, was dich beschäftigt — z.B. <em>&#8222;Müdigkeit&#8220;</em>, <em>&#8222;Marfan&#8220;</em> oder <em>&#8222;Kassenarzt&#8220;</em>.
               </p>
               <p className="text-sm mb-8">
                 <Link href="/beschwerden" className="inline-flex items-center gap-1.5 font-medium text-[var(--color-donau-blau)] hover:underline">
