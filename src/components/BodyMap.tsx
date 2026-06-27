@@ -2,6 +2,7 @@
 
 import { useRouter } from '@/i18n/navigation'
 import { useEffect, useState } from 'react'
+import { Check } from 'lucide-react'
 
 interface Region {
   id: string
@@ -80,7 +81,6 @@ export function BodyMap({
   const [filter, setFilter] = useState('')
   const [copied, setCopied] = useState(false)
   const matchedId = matchRegion(filter)
-  const hovered = REGIONS.find((r) => r.id === hover)
   // Region, deren Detail-Kontext (Beispiel/Co-Region) gezeigt wird:
   // Auswahl > Suchtreffer > Hover
   const focusId = selected[selected.length - 1] ?? matchedId ?? hover
@@ -96,6 +96,7 @@ export function BodyMap({
     const param = new URLSearchParams(window.location.search).get('regionen')
     if (param) {
       const ids = param.split(',').map((x) => x.trim()).filter((id) => REGIONS.some((r) => r.id === id)).slice(0, 2)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (ids.length) { setSelected(ids); return }
     }
     const hash = window.location.hash.replace('#', '')
@@ -159,7 +160,7 @@ export function BodyMap({
             <p className="mt-1 px-1 text-xs text-[var(--color-muted)]">
               Keine eindeutige Region.{' '}
               <button type="button" onClick={() => router.push(`/selten?q=${encodeURIComponent(filter.trim())}`)}
-                className="text-[var(--color-donau-blau)] hover:underline">„{filter.trim()}" direkt suchen</button>
+                className="text-[var(--color-donau-blau)] hover:underline">&#8222;{filter.trim()}&#8220; direkt suchen</button>
               {' '}oder{' '}
               <button type="button" onClick={() => router.push(`/navigator?q=${encodeURIComponent(filter.trim())}`)}
                 className="text-[var(--color-donau-blau)] hover:underline">im Navigator beschreiben</button>.
@@ -193,7 +194,9 @@ export function BodyMap({
             )}
             <button type="button" onClick={shareSelection}
               className="text-xs text-[var(--color-donau-blau)] hover:underline transition-colors text-center">
-              {copied ? 'Link kopiert ✓' : 'Auswahl teilen'}
+              {copied ? (
+                <span className="inline-flex items-center gap-1">Link kopiert <Check width={12} height={12} strokeWidth={1.5} fill="none" aria-hidden="true" /></span>
+              ) : 'Auswahl teilen'}
             </button>
             <button type="button" onClick={() => setSelected([])}
               className="text-xs text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)] transition-colors text-center">
@@ -251,7 +254,7 @@ export function BodyMap({
               onBlur={() => setHover(null)}
               aria-label={`${r.label} — Erkrankungen in diesem Bereich${counts[r.value] ? ` (${counts[r.value]})` : ''}`}
               aria-pressed={isSelected}
-              className={`absolute -translate-x-1/2 -translate-y-1/2 flex items-center gap-1.5 rounded-full border bg-white/95 px-2.5 py-1 text-xs font-medium shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-selten-violett)] ${isMatched ? 'animate-pulse' : ''}`}
+              className={`absolute -translate-x-1/2 -translate-y-1/2 flex items-center gap-1.5 rounded-full border bg-white/95 px-2.5 py-1 text-xs font-medium shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-selten-violett)] ${isMatched ? 'motion-safe:animate-pulse' : ''}`}
               style={{
                 top: r.top,
                 left: r.left,
@@ -272,7 +275,7 @@ export function BodyMap({
                 <span className="ml-0.5 text-[10px] text-[var(--color-muted)]">{counts[r.value].toLocaleString('de-AT')}</span>
               ) : null}
               {isSelected && (
-                <span className="ml-0.5 text-[10px] font-bold text-[var(--color-selten-violett)]">✓</span>
+                <Check width={10} height={10} strokeWidth={2} fill="none" aria-hidden="true" className="ml-0.5 text-[var(--color-selten-violett)]" />
               )}
             </button>
           )

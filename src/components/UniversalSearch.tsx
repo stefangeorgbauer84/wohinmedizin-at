@@ -195,6 +195,7 @@ export function UniversalSearch({
   // Spracheingabe (Web Speech API) — nur wenn vom Browser unterstützt
   useEffect(() => {
     const SR = (window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown })
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVoiceSupported(Boolean(SR.SpeechRecognition || SR.webkitSpeechRecognition))
   }, [])
 
@@ -203,6 +204,7 @@ export function UniversalSearch({
     if (size !== 'lg') return
     try {
       const seen = localStorage.getItem('wohin:slash-hint-seen')
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (!seen) { setShowSlashHint(true); const t = setTimeout(() => setShowSlashHint(false), 4000); return () => clearTimeout(t) }
     } catch { /* ignore */ }
   }, [size])
@@ -267,7 +269,7 @@ export function UniversalSearch({
       <div aria-live="polite" role="status" className="sr-only">{liveMessage}</div>
       {/* Keyboard-Shortcut-Tooltip — erster Besuch */}
       {showSlashHint && (
-        <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full bg-[var(--color-medizin-navy)] px-3 py-1.5 text-xs text-white shadow-lg animate-fade-in pointer-events-none z-50 whitespace-nowrap">
+        <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full bg-[var(--color-medizin-navy)] px-3 py-1.5 text-xs text-white shadow-lg motion-safe:animate-fade-in pointer-events-none z-50 whitespace-nowrap">
           <kbd className="font-mono bg-white/20 rounded px-1 py-0.5">/</kbd>
           <span>drücken um zu suchen</span>
         </div>
@@ -292,7 +294,7 @@ export function UniversalSearch({
           )}
           {voiceSupported && (
             <button type="button" onClick={toggleVoice} aria-label={listening ? 'Spracheingabe stoppen' : 'Per Sprache suchen'} aria-pressed={listening}
-              className={`p-1.5 rounded-full transition-colors ${listening ? 'bg-red-50 text-red-600 animate-pulse' : 'text-[var(--color-muted)] hover:bg-[var(--color-warmweiss)] hover:text-[var(--color-selten-violett)]'}`}>
+              className={`p-1.5 rounded-full transition-colors ${listening ? 'bg-red-50 text-red-600 motion-safe:animate-pulse' : 'text-[var(--color-muted)] hover:bg-[var(--color-warmweiss)] hover:text-[var(--color-selten-violett)]'}`}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 10a7 7 0 0 0 14 0M12 19v3" />
               </svg>
@@ -382,7 +384,7 @@ export function UniversalSearch({
               {!loading && noResults && (
                 <div className="px-4 py-4">
                   <p className="text-sm text-[var(--color-medizin-navy)]">
-                    Keine direkten Treffer für <strong>„{q.trim()}"</strong>.
+                    Keine direkten Treffer für <strong>&#8222;{q.trim()}&#8220;</strong>.
                   </p>
                   <p className="text-xs text-[var(--color-muted)] mt-1 mb-3">
                     Tippfehler? Versuche es allgemeiner — oder beschreibe dein Anliegen frei.
@@ -390,7 +392,7 @@ export function UniversalSearch({
                   <div className="flex flex-col gap-1.5">
                     <button type="button" onClick={() => go(`/navigator?q=${encodeURIComponent(q.trim())}`)}
                       className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-donau-blau)] hover:underline">
-                      → „{q.trim()}" im Navigator beschreiben
+                      → &#8222;{q.trim()}&#8220; im Navigator beschreiben
                     </button>
                     <button type="button" onClick={() => go('/selten')}
                       className="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-medizin-navy)]">

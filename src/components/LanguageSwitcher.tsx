@@ -3,7 +3,8 @@
 import { useLocale } from 'next-intl'
 import { useRouter, usePathname } from '@/i18n/navigation'
 import { useTransition, useState, useRef, useEffect } from 'react'
-import { locales, type Locale, rtlLocales } from '@/i18n/routing'
+import { type Locale, rtlLocales } from '@/i18n/routing'
+import { Check } from 'lucide-react'
 
 const LANGUAGE_GROUPS: { key: string; label: string; locales: Locale[] }[] = [
   {
@@ -191,7 +192,9 @@ export function LanguageSwitcher() {
                           </span>
                         )}
                         {isActive && (
-                          <span className="text-[10px] text-white/70 mt-0.5">✓ aktiv</span>
+                          <span className="inline-flex items-center gap-0.5 text-[10px] text-white/70 mt-0.5">
+                            <Check width={10} height={10} strokeWidth={2} fill="none" aria-hidden="true" /> aktiv
+                          </span>
                         )}
                       </button>
                     )

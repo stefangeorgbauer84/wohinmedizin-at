@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Card } from './ui'
 
 const INTEREST_OPTIONS = [
   { value: 'studien', label: 'Studien-Hinweise & Rekrutierung' },
@@ -44,10 +45,10 @@ export function PartnerForm() {
 
   if (status === 'success') {
     return (
-      <div role="status" className="rounded-xl bg-[var(--color-morgen-hellblau)] border border-[var(--color-border)] p-8 text-center">
+      <Card role="status" className="bg-[var(--color-morgen-hellblau)] p-8 text-center">
         <p className="text-lg font-semibold text-[var(--color-medizin-navy)] mb-2">Anfrage erhalten.</p>
         <p className="text-sm text-[var(--color-muted)]">Wir melden uns innerhalb von 2 Werktagen.</p>
-      </div>
+      </Card>
     )
   }
 

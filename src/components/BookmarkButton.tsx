@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-const KEY = 'wohin:merkliste'
+const KEY = 'wohinmedizin:bookmarks'
 
 export interface BookmarkItem {
   slug: string
@@ -32,6 +32,7 @@ export function BookmarkButton({ slug, name }: BookmarkItem) {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSaved(readList().some((i) => i.slug === slug))
     setReady(true)
   }, [slug])
@@ -45,21 +46,32 @@ export function BookmarkButton({ slug, name }: BookmarkItem) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-pressed={saved}
-      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
-        saved
-          ? 'bg-[var(--color-selten-violett)] text-white border-[var(--color-selten-violett)]'
-          : 'bg-white text-[var(--color-medizin-navy)] border-[var(--color-border)] hover:border-[var(--color-selten-violett)]'
-      }`}
-      style={{ visibility: ready ? 'visible' : 'hidden' }}
-    >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-      </svg>
-      {saved ? 'Gemerkt' : 'Merken'}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={toggle}
+        aria-pressed={saved}
+        aria-label={saved ? `${name} aus der Merkliste entfernen` : `${name} zur Merkliste hinzufügen`}
+        className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
+          saved
+            ? 'bg-[var(--color-selten-violett)] text-white border-[var(--color-selten-violett)]'
+            : 'bg-white text-[var(--color-medizin-navy)] border-[var(--color-border)] hover:border-[var(--color-selten-violett)]'
+        }`}
+        style={{ visibility: ready ? 'visible' : 'hidden' }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+        </svg>
+        {saved ? 'Gemerkt' : 'Merken'}
+      </button>
+      <noscript>
+        <a
+          href={`/selten/${slug}`}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border border-[var(--color-border)] bg-white text-[var(--color-medizin-navy)]"
+        >
+          {name} aufrufen
+        </a>
+      </noscript>
+    </>
   )
 }
