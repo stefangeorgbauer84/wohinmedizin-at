@@ -21,6 +21,17 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  async redirects() {
+    if (process.env.NODE_ENV !== 'production') return []
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'header', key: 'x-forwarded-proto', value: 'http' }],
+        destination: 'https://wohinmedizin.at/:path*',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 export default withPayload(withNextIntl(nextConfig))
