@@ -19,6 +19,7 @@ import { ExpertReviews } from './src/collections/ExpertReviews'
 import { PatientOrganizations } from './src/collections/PatientOrganizations'
 import { ExpertCenters } from './src/collections/ExpertCenters'
 import { PatientStories } from './src/collections/PatientStories'
+import { OrphaCode } from './src/collections/OrphaCode'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -49,6 +50,7 @@ export default buildConfig({
     PatientOrganizations,
     ExpertCenters,
     PatientStories,
+    OrphaCode,
   ],
 
   editor: lexicalEditor(),
