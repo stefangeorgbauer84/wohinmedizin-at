@@ -32,11 +32,11 @@ body {
 }
 
 .wohin-gradient {
-  background: linear-gradient(135deg, #1E88E5, #3DDC97);
+  background: linear-gradient(135deg, var(--color-donau-blau), var(--color-alpen-mint));
 }
 
 .wohin-gradient-text {
-  background: linear-gradient(135deg, #1E88E5, #3DDC97);
+  background: linear-gradient(135deg, var(--color-donau-blau), var(--color-alpen-mint));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -44,7 +44,7 @@ body {
 }
 
 .selten-gradient {
-  background: linear-gradient(135deg, #1E88E5, #7C3AED, #3DDC97);
+  background: linear-gradient(135deg, var(--color-donau-blau), var(--color-selten-violett), var(--color-alpen-mint));
 }
 
 /* Kurzes Einblenden — z.B. Keyboard-Shortcut-Tooltip in der Suche */
@@ -56,9 +56,12 @@ body {
   animation: wohin-fade-in 0.25s ease-out;
 }
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-in { animation: none; }
-  /* Pulsieren (Körperkarten-Treffer, Mikrofon) deaktivieren — statische Hervorhebung bleibt */
-  .animate-pulse { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Druckansicht: Navigation, Footer und interaktive Schaltflächen ausblenden */
@@ -73,7 +76,7 @@ body {
     padding: 0 !important;
   }
   body {
-    background: #fff !important;
+    background: white !important;
   }
   a[href]::after {
     content: '';

@@ -16,6 +16,7 @@ export function RecentlyViewed() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(RECENT_KEY)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setItems(raw ? (JSON.parse(raw) as Item[]).slice(0, 6) : [])
     } catch { setItems([]) }
   }, [])
