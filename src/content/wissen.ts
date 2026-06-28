@@ -169,6 +169,61 @@ export const WISSEN_ARTICLES: WissenArticle[] = [
       { h: 'Patientenorganisationen früh einbeziehen', p: 'Auch ohne Diagnose kann eine thematisch passende Patientenorganisation erfahrungsbasierte Hinweise geben, welche Zentren und Tests relevant sein könnten.' },
     ],
   },
+  {
+    slug: 'notaufnahme-oder-hausarzt',
+    title: 'Notaufnahme oder Hausarzt? Wann in die Notaufnahme gehen',
+    description: 'Die Notaufnahme ist für echte Notfälle — was gehört dorthin, was besser zum Hausarzt oder in die Bereitschaft?',
+    intro: 'Notaufnahmen sind für lebensbedrohliche Situationen gedacht. Trotzdem kommen viele Menschen mit Beschwerden dorthin, die anderswo besser aufgehoben wären — oft aus Unsicherheit.',
+    sections: [
+      { h: 'Was in die Notaufnahme gehört', p: 'Starke Brustschmerzen, Atemnot, Schlaganfall-Zeichen (Lähmung, Sprachstörung, Sehverlust), schwere Verletzungen, Bewusstlosigkeit, Vergiftungen oder Allergien mit Schwellung im Halsbereich.' },
+      { h: 'Was zum Ärztebereitschaftsdienst passt', p: 'Fieber ohne Bewusstlosigkeit, Ohrenschmerzen, Harnwegsinfekte, Erbrechen ohne Blut, starker Schnupfen — das ist für den Ärztebereitschaftsdienst (141) gedacht, der außerhalb der Ordinationszeiten da ist.' },
+      { h: 'Orientierung: Anruf bei 1450', p: 'Die Gesundheitsberatung 1450 hilft dir rund um die Uhr zu entscheiden, wohin du dich wenden sollst. Diplom-Pflegepersonen schätzen deine Symptome ein und empfehlen den richtigen Weg.' },
+    ],
+  },
+  {
+    slug: 'e-card-oesterreich',
+    title: 'e-Card in Österreich: Alles, was du wissen musst',
+    description: 'Was die e-Card ist, wo du sie brauchst, was bei Verlust zu tun ist und was sich für vulnerable Gruppen ändert.',
+    intro: 'Die e-Card ist der Schlüssel zum österreichischen Gesundheitssystem. Ohne sie kann es bei Kassenarztterminen zu Komplikationen kommen — aber Ausnahmen gibt es.',
+    sections: [
+      { h: 'Was die e-Card ist', p: 'Die elektronische Gesundheitskarte (e-Card) weist dich als sozialversichert aus. Sie ersetzt den Krankenschein und wird beim Kassenarzt, in der Ordination und im Spital gesteckt.' },
+      { h: 'Was passiert ohne e-Card', p: 'Ohne e-Card musst du eine Krankenscheingebühr zahlen oder du wirst als Privatpatient behandelt. Ärztinnen dürfen im Notfall nicht ablehnen — aber Folgetermine werden anders abgerechnet.' },
+      { h: 'Was bei Verlust zu tun ist', p: 'Sofort den Verlust beim Hauptverband der Sozialversicherungsträger (sozialversicherung.at) oder per Telefon melden. Eine Ersatzkarte kommt per Post. Für dringende Termine genügt bis dahin ein Lichtbildausweis.' },
+    ],
+  },
+  {
+    slug: 'zweitmeinung-oesterreich',
+    title: "Zweitmeinung einholen in Österreich — so geht's",
+    description: 'Wann eine Zweitmeinung sinnvoll ist, wie du sie bekommst und ob die Krankenkasse sie übernimmt.',
+    intro: 'Eine Zweitmeinung ist kein Misstrauensvotum gegenüber deiner Ärztin — sie ist ein legitimes Recht. Gerade bei schwerwiegenden Diagnosen oder geplanten Operationen ist sie medizinisch sinnvoll.',
+    sections: [
+      { h: 'Wann du eine Zweitmeinung einholen solltest', p: 'Bei einer schwerwiegenden oder unerwarteten Diagnose, vor einem größeren operativen Eingriff, bei lang anhaltenden ungeklärten Beschwerden oder wenn die vorgeschlagene Therapie Zweifel aufwirft.' },
+      { h: 'Wie du eine Zweitmeinung bekommst', p: 'Du kannst dich direkt an eine andere Fachärztin wenden. Bring alle Befunde, Arztbriefe und Bildgebung mit. In Österreich gibt es kein formelles Zweitmeinungsprogramm wie in Deutschland — du kannst aber immer eine weitere ärztliche Meinung einholen.' },
+      { h: 'Kostenübernahme durch die Kasse', p: 'Eine Zweitmeinung wird in der Regel wie ein normaler Arztbesuch abgerechnet — mit Überweisung beim Kassenarzt oder als Privatarzt. Bei elektiven Operationen prüft es sich, ob die Kasse besondere Regelungen hat.' },
+    ],
+  },
+  {
+    slug: 'wahlarztkasse-erstattung',
+    title: 'Wahlarzt-Erstattung durch die Krankenkasse: So funktioniert es',
+    description: 'Schritt für Schritt: Honorarnote einreichen, Erstattungssatz verstehen, Fristen beachten.',
+    intro: 'Viele Österreicherinnen nutzen Wahlärzte — und bekommen einen Teil der Kosten zurück. Das System ist aber komplex. So funktioniert die Erstattung.',
+    sections: [
+      { h: 'Wie hoch die Erstattung ist', p: 'Erstattet werden ca. 80 Prozent des entsprechenden Kassentarifs — nicht des tatsächlich bezahlten Betrags. Da Wahlärzte oft deutlich mehr verlangen, bleibt ein Eigenanteil. Beispiel: Kassentarif 50 €, Wahlarzt verrechnet 150 € → Erstattung ca. 40 €.' },
+      { h: 'Wie du die Rechnung einreichst', p: 'Die Honorarnote des Wahlarzts bei deiner Krankenkasse einreichen — persönlich, per Post oder online über meine.sv.at. Die Rechnung muss bestimmte Pflichtangaben enthalten (Name, Datum, Diagnose, Leistungsbeschreibung).' },
+      { h: 'Fristen und Ausnahmen', p: 'Die Frist für die Einreichung beträgt bei den meisten Kassen 3 Jahre ab Rechnungsdatum. Einige Kassen haben eigene Regelungen — prüf das auf der Website deiner Kasse oder ruf an.' },
+    ],
+  },
+  {
+    slug: 'mutter-kind-pass-oesterreich',
+    title: 'Mutter-Kind-Pass in Österreich: Untersuchungen und Beihilfen',
+    description: 'Was der Mutter-Kind-Pass beinhaltet, welche Untersuchungen wann fällig sind und welche Beihilfen davon abhängen.',
+    intro: 'Der Mutter-Kind-Pass begleitet Schwangere und Kleinkinder durch die wichtigsten Vorsorgeuntersuchungen. Bestimmte Beihilfen sind daran geknüpft.',
+    sections: [
+      { h: 'Was im MKP enthalten ist', p: 'Sieben Untersuchungen während der Schwangerschaft, fünf nach der Geburt. Für das Kind sechs Untersuchungen im ersten Lebensjahr (U1 bis U6). Alle Untersuchungen sind im Kassenrahmen kostenlos.' },
+      { h: 'Welche Beihilfen daran hängen', p: 'Das Kinderbetreuungsgeld (pauschales Modell) und der Kinderbonus sind an die Durchführung von mind. 5 Mutter-Kind-Pass-Untersuchungen gebunden — bei Mutter und Kind. Wer Untersuchungen versäumt, riskiert den Bonus.' },
+      { h: 'Was sich seit 2024 geändert hat', p: 'Seit 2024 wird der Mutter-Kind-Pass schrittweise auf den Eltern-Kind-Pass umgestellt. Beide Elternteile können bestimmte Untersuchungen wahrnehmen. Die elektronische Dokumentation via ELGA wird ausgebaut.' },
+    ],
+  },
 ]
 
 export function getWissenArticle(slug: string): WissenArticle | undefined {

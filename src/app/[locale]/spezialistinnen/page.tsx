@@ -4,14 +4,21 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { listCenters } from '@/lib/care-pathway'
 import { VerifiedBadge } from '@/components/VerifiedBadge'
+import { MedicalOrganizationJsonLd } from '@/components/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://wohinmedizin.at'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'Spezialzentren für seltene Erkrankungen in Österreich — WohinMedizin.at',
-  description: 'Durchsuchbares Verzeichnis österreichischer Referenz- und Spezialzentren für seltene Erkrankungen, inklusive ERN-Anbindung und Kontakt.',
+  title: 'Spezialist:innen & Spezialzentren in Österreich — WohinMedizin.at',
+  description: 'Verzeichnis österreichischer Spezialist:innen, Referenz- und Spezialzentren für seltene Erkrankungen — Kassenarzt, Wahlarzt und ERN-zertifizierte Einrichtungen in ganz Österreich.',
   alternates: { canonical: `${SITE_URL}/spezialistinnen` },
+  openGraph: {
+    title: 'Spezialist:innen & Spezialzentren in Österreich — WohinMedizin.at',
+    description: 'Kassenarzt, Wahlarzt und ERN-zertifizierte Spezialzentren für seltene Erkrankungen in Österreich finden.',
+    url: `${SITE_URL}/spezialistinnen`,
+    type: 'website',
+  },
 }
 
 const CENTER_TYPE_LABELS: Record<string, string> = {
@@ -43,15 +50,23 @@ export default async function SpezialistinnenPage({ searchParams }: { searchPara
 
   return (
     <>
+      <MedicalOrganizationJsonLd
+        name="WohinMedizin.at — Spezialist:innen-Verzeichnis"
+        url={`${SITE_URL}/spezialistinnen`}
+        description="Verzeichnis österreichischer Spezialist:innen und Referenzzentren für seltene Erkrankungen, inklusive Kassenarzt- und Wahlarzt-Einrichtungen sowie ERN-Netzwerke."
+      />
       <Header />
       <main id="hauptinhalt" className="flex-1 bg-[var(--color-warmweiss)]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
           <h1 className="text-3xl md:text-4xl font-bold text-[var(--color-medizin-navy)] mb-3">
-            Spezialzentren in Österreich
+            Spezialist:innen &amp; Spezialzentren in Österreich
           </h1>
-          <p className="text-[var(--color-muted)] leading-relaxed mb-6 max-w-2xl">
-            Referenz- und Spezialzentren für seltene Erkrankungen. Eine Überweisung erfolgt in der Regel
-            über die Hausärztin oder den Hausarzt.
+          <p className="text-[var(--color-muted)] leading-relaxed mb-2 max-w-2xl">
+            Durchsuche österreichische Referenz- und Spezialzentren für seltene Erkrankungen — von
+            Kassenarzt- und Wahlarzt-Einrichtungen bis hin zu ERN-zertifizierten Universitätskliniken.
+          </p>
+          <p className="text-sm text-[var(--color-muted)] leading-relaxed mb-6 max-w-2xl">
+            Eine Überweisung erfolgt in der Regel über die Hausärztin oder den Hausarzt.
           </p>
 
           <form method="GET" action="/spezialistinnen" className="flex flex-col sm:flex-row gap-3 mb-6">

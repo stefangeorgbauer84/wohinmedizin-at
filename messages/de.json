@@ -105,7 +105,10 @@
       { "q": "Wann reicht die Hausärztin?", "href": "/wissen/wann-reicht-die-hausaerztin" },
       { "q": "Kassenarzt vs. Wahlarzt — der Unterschied", "href": "/wissen/kassenarzt-wahlarzt-unterschied" },
       { "q": "Wie funktioniert eine Überweisung?", "href": "/wissen/ueberweisung-oesterreich" },
-      { "q": "Wann rasch medizinische Hilfe holen?", "href": "/wissen/wann-rasch-medizinische-hilfe" }
+      { "q": "Wann rasch medizinische Hilfe holen?", "href": "/wissen/wann-rasch-medizinische-hilfe" },
+      { "q": "Notaufnahme oder Hausarzt — was tun?", "href": "/wissen/notaufnahme-oder-hausarzt" },
+      { "q": "Wie funktioniert die e-card in Österreich?", "href": "/wissen/e-card-oesterreich" },
+      { "q": "Wie beantrage ich eine Zweitmeinung?", "href": "/wissen/zweitmeinung-oesterreich" }
     ]
   },
   "forDoctorsSection": {

@@ -44,3 +44,65 @@ export function MedicalConditionJsonLd({
     />
   )
 }
+
+// ---------------------------------------------------------------------------
+// MedicalOrganization — used on /spezialistinnen directory page
+// ---------------------------------------------------------------------------
+
+type MedicalOrganizationJsonLdProps = {
+  name: string
+  url: string
+  description?: string
+}
+
+export function MedicalOrganizationJsonLd({ name, url, description }: MedicalOrganizationJsonLdProps) {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalOrganization',
+    name,
+    url,
+    ...(description ? { description } : {}),
+    areaServed: { '@type': 'Country', name: 'Österreich' },
+    medicalSpecialty: 'Rare Diseases',
+  }
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(data) }} />
+}
+
+// ---------------------------------------------------------------------------
+// AboutPage — used on /ueber-uns
+// ---------------------------------------------------------------------------
+
+type AboutPageJsonLdProps = {
+  name: string
+  url: string
+  description: string
+}
+
+export function AboutPageJsonLd({ name, url, description }: AboutPageJsonLdProps) {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name,
+    url,
+    description,
+    publisher: { '@type': 'Organization', name: 'WohinMedizin.at', url: 'https://wohinmedizin.at' },
+  }
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(data) }} />
+}
+
+// ---------------------------------------------------------------------------
+// Physician WebPage — used on /fuer-aerzte
+// ---------------------------------------------------------------------------
+
+export function PhysicianPageJsonLd({ url }: { url: string }) {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Für Ärztinnen & Ärzte — WohinMedizin.at',
+    url,
+    description: 'Profil-Optionen und Ressourcen für Ärztinnen, Ärzte und Gesundheitseinrichtungen auf WohinMedizin.at.',
+    audience: { '@type': 'MedicalAudience', audienceType: 'Physician' },
+    publisher: { '@type': 'Organization', name: 'WohinMedizin.at', url: 'https://wohinmedizin.at' },
+  }
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(data) }} />
+}

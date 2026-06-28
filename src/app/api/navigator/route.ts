@@ -82,17 +82,19 @@ export async function POST(req: NextRequest) {
     })
   }
 
+  // HTML-Tags aus der Eingabe entfernen — verhindert Prompt-Injection via Markup
+  const sanitized = anliegen.trim().replace(/<[^>]*>/g, '')
+
   const encoder = new TextEncoder()
 
   const stream = new ReadableStream({
     async start(controller) {
       try {
         const response = await client.messages.create({
-          model: 'claude-opus-4-8',
+          model: 'claude-haiku-4-5-20251001',
           max_tokens: 1024,
-          thinking: { type: 'adaptive' },
           system: SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: anliegen.trim() }],
+          messages: [{ role: 'user', content: sanitized }],
           stream: true,
         })
 

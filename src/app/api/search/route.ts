@@ -15,10 +15,12 @@ export async function GET(req: NextRequest) {
   }
 
   const q = req.nextUrl.searchParams.get('q') ?? ''
+  const localeParam = req.nextUrl.searchParams.get('locale') ?? 'de'
+  const locale = ['de', 'en'].includes(localeParam) ? localeParam : 'de'
   if (q.trim().length < 2) {
     return Response.json({ diseases: [], symptoms: [], pages: [] })
   }
-  const results = await universalSearch(q, 'de')
+  const results = await universalSearch(q, locale)
   return Response.json(results, {
     headers: { 'Cache-Control': 'public, max-age=30, stale-while-revalidate=300' },
   })

@@ -1,10 +1,16 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { NotfallBanner } from '@/components/NotfallBanner'
 import { RED_FLAG_PATTERNS } from '@/lib/red-flags'
+
+const LOADING_MESSAGES = [
+  'Orientierungsinformationen werden aufbereitet…',
+  'Fast fertig…',
+]
 
 interface FachRichtung {
   fachrichtung: string
@@ -29,10 +35,19 @@ export default function NavigatorPageClient() {
   // Übergabe aus WohinSuche/Startseite: ?q= füllt das Feld vor
   const [anliegen, setAnliegen] = useState(() => (searchParams.get('q') ?? '').slice(0, 1000))
   const [loading, setLoading] = useState(false)
+  const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0])
   const [result, setResult] = useState<NavigatorResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [emergency, setEmergency] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (!loading) return
+    setLoadingMessage(LOADING_MESSAGES[0])
+    const t1 = setTimeout(() => setLoadingMessage(LOADING_MESSAGES[0]), 0)
+    const t2 = setTimeout(() => setLoadingMessage(LOADING_MESSAGES[1]), 5000)
+    return () => { clearTimeout(t1); clearTimeout(t2) }
+  }, [loading])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -135,6 +150,11 @@ export default function NavigatorPageClient() {
           </span>
         </div>
 
+        {/* Notfall-Schnellzugriff */}
+        <div className="mb-6">
+          <NotfallBanner />
+        </div>
+
         {/* Notfall-Warnung bei erkannten Warnzeichen */}
         {emergency && (
           <div
@@ -206,7 +226,7 @@ export default function NavigatorPageClient() {
               ))}
             </div>
             <p className="text-sm" style={{ color: '#4A6080' }}>
-              {t('loadingText')}
+              {loadingMessage}
             </p>
           </div>
         )}
@@ -369,11 +389,33 @@ export default function NavigatorPageClient() {
                   <span>Krankheitsdatenbank zu deinem Anliegen durchsuchen</span>
                   <span aria-hidden="true">→</span>
                 </Link>
-                <Link href="/spezialistinnen" className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors" style={{ backgroundColor: '#F3FAFF', color: '#123047' }}>
-                  <span>Spezialist:innen & Zentren in Österreich ansehen</span>
-                  <span aria-hidden="true">→</span>
-                </Link>
+                {result.relevanteRichtungen.length > 0 ? (
+                  <Link
+                    href={`/spezialistinnen?q=${encodeURIComponent(result.relevanteRichtungen[0].fachrichtung)}`}
+                    className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors"
+                    style={{ backgroundColor: '#F3FAFF', color: '#123047' }}
+                  >
+                    <span>{result.relevanteRichtungen[0].fachrichtung} — Spezialist:innen in Österreich finden</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                ) : (
+                  <Link href="/spezialistinnen" className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors" style={{ backgroundColor: '#F3FAFF', color: '#123047' }}>
+                    <span>Spezialist:innen & Zentren in Österreich ansehen</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                )}
               </div>
+            </div>
+
+            {/* Ergebnis drucken */}
+            <div className="text-center">
+              <button
+                onClick={() => window.print()}
+                className="text-sm underline"
+                style={{ color: '#8AABB8' }}
+              >
+                Ergebnis drucken
+              </button>
             </div>
 
             {/* Pflichthinweis */}

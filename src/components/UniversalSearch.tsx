@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from '@/i18n/navigation'
+import { useLocale } from 'next-intl'
 import { isRedFlag } from '@/lib/red-flags'
 
 // Kurze Inline-Antworten für häufige Orientierungsfragen (Schlagwort → Antwort + Ziel)
@@ -77,6 +78,7 @@ export function UniversalSearch({
   autoFocus = false,
 }: { size?: 'lg' | 'sm'; placeholder?: string; autoFocus?: boolean }) {
   const router = useRouter()
+  const locale = useLocale()
   const [q, setQ] = useState('')
   const [results, setResults] = useState<Results>(EMPTY)
   const [open, setOpen] = useState(false)
@@ -141,7 +143,7 @@ export function UniversalSearch({
     if (value.trim().length < 2) { setResults(EMPTY); setLoading(false); return }
     setLoading(true)
     const reqId = ++reqRef.current
-    fetch(`/api/search?q=${encodeURIComponent(value)}`)
+    fetch(`/api/search?q=${encodeURIComponent(value)}&locale=${encodeURIComponent(locale)}`)
       .then((r) => r.json())
       .then((data: Results) => { if (reqId === reqRef.current) { setResults(data ?? EMPTY); setActive(0); setLoading(false) } })
       .catch(() => { if (reqId === reqRef.current) setLoading(false) })
@@ -150,7 +152,7 @@ export function UniversalSearch({
   function onChange(value: string) {
     setQ(value); setOpen(true); setActive(0)
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => runSearch(value), 180)
+    debounceRef.current = setTimeout(() => runSearch(value), 300)
   }
   function go(href: string) {
     if (!isEmpty) pushSearchHistory(q)

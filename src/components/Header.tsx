@@ -3,6 +3,15 @@ import { Link } from '@/i18n/navigation'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { NavLink } from './NavLink'
 import { SearchTrigger } from './SearchTrigger'
+import { MobileNav } from './MobileNav'
+
+const NAV_LINKS = [
+  { label: 'Erkrankungen', href: '/selten' },
+  { label: 'Fachrichtungen', href: '/spezialistinnen' },
+  { label: 'Wissen', href: '/wissen' },
+  { label: 'Symptom-Finder', href: '/finden', highlight: true },
+  { label: 'Für Ärzt:innen', href: '/fuer-aerzte' },
+] as const
 
 export async function Header() {
   const t = await getTranslations('nav')
@@ -61,7 +70,7 @@ export async function Header() {
             </NavLink>
           </nav>
 
-          {/* Right side: Suche + Merkliste + Language switcher + CTA */}
+          {/* Right side: Suche + Merkliste + Language switcher + CTA + Mobile hamburger */}
           <div className="flex items-center gap-3 shrink-0">
             <SearchTrigger />
             <Link href="/merkliste" aria-label="Meine Merkliste" className="hidden sm:inline-flex p-2 rounded-lg text-[var(--color-muted)] hover:text-[var(--color-selten-violett)] transition-colors">
@@ -72,13 +81,16 @@ export async function Header() {
             {/* Language Switcher — always visible */}
             <LanguageSwitcher />
 
-            {/* CTA button — hidden on very small screens */}
+            {/* CTA button — hidden on small screens and below lg */}
             <Link
               href="/navigator"
-              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg wohin-gradient text-white text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
+              className="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-lg wohin-gradient text-white text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
             >
               {t('startOrientation')}
             </Link>
+
+            {/* Mobile hamburger menu */}
+            <MobileNav links={NAV_LINKS} />
           </div>
         </div>
       </div>

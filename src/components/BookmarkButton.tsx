@@ -7,6 +7,7 @@ const KEY = 'wohinmedizin:bookmarks'
 export interface BookmarkItem {
   slug: string
   name: string
+  orphaCode?: string
 }
 
 function readList(): BookmarkItem[] {
@@ -27,7 +28,7 @@ function writeList(items: BookmarkItem[]) {
   }
 }
 
-export function BookmarkButton({ slug, name }: BookmarkItem) {
+export function BookmarkButton({ slug, name, orphaCode }: BookmarkItem) {
   const [saved, setSaved] = useState(false)
   const [ready, setReady] = useState(false)
 
@@ -40,7 +41,7 @@ export function BookmarkButton({ slug, name }: BookmarkItem) {
   function toggle() {
     const list = readList()
     const exists = list.some((i) => i.slug === slug)
-    const next = exists ? list.filter((i) => i.slug !== slug) : [...list, { slug, name }]
+    const next = exists ? list.filter((i) => i.slug !== slug) : [...list, { slug, name, ...(orphaCode ? { orphaCode } : {}) }]
     writeList(next)
     setSaved(!exists)
   }

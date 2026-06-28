@@ -42,6 +42,7 @@ export async function Footer() {
             <h4 className="text-sm font-semibold mb-3 text-white">{t('platformHeading')}</h4>
             <ul className="space-y-2 text-sm text-slate-300">
               <li><Link href="/navigator" className="hover:text-white transition-colors">{t('navigatorLink')}</Link></li>
+              <li><Link href="/notfall" className="hover:text-white transition-colors">Notfallnummern</Link></li>
               <li><Link href="/wissen" className="hover:text-white transition-colors">Wissen</Link></li>
               <li><Link href="/merkliste" className="hover:text-white transition-colors">Meine Merkliste</Link></li>
               <li><Link href="/fuer-aerzte" className="hover:text-white transition-colors">{t('forDoctors')}</Link></li>
