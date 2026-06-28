@@ -224,6 +224,30 @@ export const WISSEN_ARTICLES: WissenArticle[] = [
       { h: 'Was sich seit 2024 geändert hat', p: 'Seit 2024 wird der Mutter-Kind-Pass schrittweise auf den Eltern-Kind-Pass umgestellt. Beide Elternteile können bestimmte Untersuchungen wahrnehmen. Die elektronische Dokumentation via ELGA wird ausgebaut.' },
     ],
   },
+  {
+    slug: 'seltene-erkrankungen-oesterreich',
+    title: 'Seltene Erkrankungen in Österreich — Wege zur Diagnose',
+    description: 'Was seltene Erkrankungen sind, warum die Diagnose oft lange dauert und welche Anlaufstellen es in Österreich gibt.',
+    intro: 'Seltene Erkrankungen betreffen weniger als 5 von 10.000 Menschen. In Österreich leben dennoch rund 400.000 bis 500.000 Betroffene. Der Weg zur richtigen Diagnose dauert im Schnitt viele Jahre — mit den richtigen Anlaufstellen lässt er sich verkürzen.',
+    sections: [
+      { h: 'Was "selten" bedeutet', p: 'Eine Erkrankung gilt in der EU als selten, wenn weniger als 5 von 10.000 Menschen betroffen sind. Trotzdem gibt es über 7.000 verschiedene seltene Erkrankungen. Zusammen sind sie alles andere als selten: In Österreich sind rund 4–5 % der Bevölkerung betroffen.' },
+      { h: 'Warum die Diagnose so lange dauert', p: 'Die häufigsten Gründe: Hausärztinnen und Fachärztinnen sehen die Erkrankung vielleicht einmal im Berufsleben. Symptome sind unspezifisch oder treffen auf häufige Erkrankungen zu. Spezialisierte Tests sind nicht routinemäßig verfügbar.' },
+      { h: 'Anlaufstellen in Österreich', p: 'Die österreichischen ERN-Zentren (European Reference Networks) sind auf seltene Erkrankungen spezialisiert. Die Plattform WohinMedizin.at listet diese Zentren mit ORPHA-Codes, Symptomen und Kontaktdaten.' },
+      { h: 'Der ORPHA-Code als Schlüssel', p: 'Jede seltene Erkrankung hat einen eindeutigen ORPHA-Code aus der Orphanet-Datenbank. Dieser Code hilft bei der Kommunikation mit Ärztinnen, bei der Suche nach Zentren und beim Zugang zu Patientenorganisationen.' },
+    ],
+  },
+  {
+    slug: 'orphan-drug-oesterreich',
+    title: 'Orphan Drugs in Österreich — Medikamente für seltene Erkrankungen',
+    description: 'Was Orphan Drugs sind, wie sie zugelassen werden und wie Betroffene in Österreich Zugang dazu erhalten.',
+    intro: 'Für viele seltene Erkrankungen gibt es inzwischen zugelassene Medikamente — sogenannte Orphan Drugs. Der Zugang ist in Österreich über Krankenkassen oder besondere Bewilligungsverfahren möglich, oft aber mit Hürden verbunden.',
+    sections: [
+      { h: 'Was sind Orphan Drugs?', p: 'Orphan Drugs sind Arzneimittel, die für die Behandlung seltener Erkrankungen entwickelt und von der EMA (Europäische Arzneimittel-Agentur) mit dem Orphan-Drug-Status ausgezeichnet wurden. Dieser Status soll Anreize für die Entwicklung setzen, die sich für Pharmaunternehmen sonst kaum rechnen würde.' },
+      { h: 'Zulassung und Erstattung in Österreich', p: 'Nach EMA-Zulassung entscheidet der Hauptverband der Sozialversicherungsträger über die Aufnahme in den Erstattungskodex. Viele Orphan Drugs sind nicht im Standard-Erstattungskodex — betroffene Personen können aber einen Einzelfallantrag bei ihrer Krankenkasse stellen.' },
+      { h: 'Patientenorganisationen und Hilfe', p: 'Die ÖGSE (Österreichische Gesellschaft für Seltene Erkrankungen) und PRO RARE Austria beraten Betroffene zum Thema Erstattung und Zugang zu Orphan Drugs. Spezialisierte Zentren helfen bei der Antragstellung.' },
+      { h: 'Klinische Studien als Weg', p: 'Wenn kein zugelassenes Medikament verfügbar ist, können klinische Studien eine Möglichkeit sein. WohinMedizin.at verlinkt auf laufende Studien auf den jeweiligen Krankheitsseiten.' },
+    ],
+  },
 ]
 
 export function getWissenArticle(slug: string): WissenArticle | undefined {

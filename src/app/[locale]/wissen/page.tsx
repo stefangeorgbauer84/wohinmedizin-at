@@ -11,11 +11,47 @@ export const metadata: Metadata = {
   description:
     'Verständliche Antworten auf häufige Fragen: Wann zu welcher Fachrichtung, Kassenarzt vs. Wahlarzt, Überweisungen und Warnzeichen in Österreich.',
   alternates: { canonical: `${SITE_URL}/wissen` },
+  openGraph: {
+    title: 'Wissen — Orientierung im österreichischen Gesundheitssystem',
+    description:
+      'Verständliche Antworten zu Kassenarzt, Überweisung, Fachrichtungen in Österreich.',
+    url: `${SITE_URL}/wissen`,
+    siteName: 'WohinMedizin.at',
+    locale: 'de_AT',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Wissen — Orientierung im österreichischen Gesundheitssystem',
+    description:
+      'Verständliche Antworten zu Kassenarzt, Überweisung, Fachrichtungen in Österreich.',
+  },
+}
+
+// JSON-LD built from static compile-time data — no user input involved
+const itemListJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Wissen — Orientierung im österreichischen Gesundheitssystem',
+  numberOfItems: WISSEN_ARTICLES.length,
+  itemListElement: WISSEN_ARTICLES.map((a, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: a.title,
+    description: a.description,
+    url: `${SITE_URL}/wissen/${a.slug}`,
+  })),
 }
 
 export default function WissenIndex() {
   return (
     <>
+      {/* JSON-LD: static trusted data only, no XSS risk */}
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+      />
       <Header />
       <main id="hauptinhalt" className="flex-1 bg-[var(--color-warmweiss)]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
