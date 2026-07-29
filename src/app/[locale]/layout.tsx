@@ -35,6 +35,20 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       languages: hreflangAlternates,
     },
     metadataBase: new URL(SITE_URL),
+    // Defaults für alle Routen unter [locale]; Seiten mit eigenem openGraph
+    // (Startseite, selten, wissen, …) überschreiben diese Werte.
+    openGraph: {
+      type: 'website',
+      siteName: 'WohinMedizin.at',
+      url: hreflangAlternates[locale] ?? SITE_URL,
+      title: t('title'),
+      description: t('description'),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('title'),
+      description: t('description'),
+    },
   }
 }
 
