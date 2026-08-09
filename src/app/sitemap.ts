@@ -45,8 +45,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/fuer-aerzte`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/ueber-uns`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.4 },
     { url: `${SITE_URL}/transparenz`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.4 },
-    { url: `${SITE_URL}/datenschutz`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${SITE_URL}/impressum`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    // /datenschutz, /impressum und /nutzungsbedingungen setzen robots.index=false.
+    // Eine Sitemap listet nur Seiten, die indexiert werden sollen — sonst meldet
+    // die Search Console "Submitted URL marked 'noindex'". Sie bleiben über den
+    // Footer verlinkt und damit für Menschen erreichbar.
   ]
 
   const wissenEntries: MetadataRoute.Sitemap = WISSEN_ARTICLES.map((a) => ({
