@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   description:
     "Alle wichtigen Notrufnummern in Österreich: 144 Rettung, 112 Europäischer Notruf, 141 Ärztlicher Bereitschaftsdienst, 1450 Gesundheitsberatung, 142 Telefonseelsorge, 147 Rat auf Draht.",
   alternates: { canonical: `${SITE_URL}/notfall` },
+  openGraph: {
+    title: "Notfallnummern Österreich | WohinMedizin.at",
+    description:
+      "Alle wichtigen Notrufnummern in Österreich: 144 Rettung, 112 Europäischer Notruf, 141 Ärztlicher Bereitschaftsdienst, 1450 Gesundheitsberatung, 142 Telefonseelsorge, 147 Rat auf Draht.",
+    url: `${SITE_URL}/notfall`,
+    type: "website",
+  },
 }
 
 interface EmergencyNumber {

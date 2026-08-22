@@ -16,6 +16,13 @@ export const metadata: Metadata = {
   description:
     'Wähle deine Anzeichen in einfacher Sprache und sieh, welche seltenen Erkrankungen dazu passen könnten — und wer sie in Österreich behandelt. Keine Diagnose.',
   alternates: { canonical: `${SITE_URL}/finden` },
+  openGraph: {
+    title: 'Symptom-Finder — Erkrankungen, die zu deinen Angaben passen | WohinMedizin.at',
+    description:
+      'Wähle deine Anzeichen in einfacher Sprache und sieh, welche seltenen Erkrankungen dazu passen könnten — und wer sie in Österreich behandelt. Keine Diagnose.',
+    url: `${SITE_URL}/finden`,
+    type: 'website',
+  },
 }
 
 type SearchParams = Promise<{ s?: string | string[] }>
